@@ -63,43 +63,45 @@ const get = (key: string | number, restriction: number) => {
     return lock;
 };
 
-/**
- * get the semaphore associated with the value of `key`
- * 
- *   + ⚠️ The object to be retrieved with `key` must already be created with `multi` ore `one`
- * 
- * @param key 
- * @returns `IFlowableLock` instance or `undefined`
- */
-export const getLockByKey = (key: string | number) => locks[key];
-/**
- * Allocate a semaphore for each `key`, and limit the number of shares with the value of `restriction`
- * 
- * @param key number or string as tag
- * @param restriction number of process restriction
- * @param pb the process body
- */
-export async function multi<T>(key: string | number, restriction: number, pb: () => Promise<T>) {
-    return get(key, restriction).flow(pb);
-    // const s = get(key, restriction);
-    // await s.acquire();
-    // try {
-    //     return await pb();
-    // } finally {
-    //     s.release();
-    // }
-}
-/**
- * synonym of `multi(key, 1, pb)`
- * 
- *  + use case
- *    * Avoid concurrent requests to the same url
- * 
- * @param key number or string as tag
- * @param pb the process body
- */
-export async function one<T>(key: string | number, pb: () => Promise<T>) {
-    return get(key, 1).flow(pb);
+export namespace restrictor {
+    /**
+     * get the semaphore associated with the value of `key`
+     * 
+     *   + ⚠️ The object to be retrieved with `key` must already be created with `multi` ore `one`
+     * 
+     * @param key 
+     * @returns `IFlowableLock` instance or `undefined`
+     */
+    export const getLockByKey = (key: string | number) => locks[key];
+    /**
+     * Allocate a semaphore for each `key`, and limit the number of shares with the value of `restriction`
+     * 
+     * @param key number or string as tag
+     * @param restriction number of process restriction
+     * @param pb the process body
+     */
+    export async function multi<T>(key: string | number, restriction: number, pb: () => Promise<T>) {
+        return get(key, restriction).flow(pb);
+        // const s = get(key, restriction);
+        // await s.acquire();
+        // try {
+        //     return await pb();
+        // } finally {
+        //     s.release();
+        // }
+    }
+    /**
+     * synonym of `multi(key, 1, pb)`
+     * 
+     *  + use case
+     *    * Avoid concurrent requests to the same url
+     * 
+     * @param key number or string as tag
+     * @param pb the process body
+     */
+    export async function one<T>(key: string | number, pb: () => Promise<T>) {
+        return get(key, 1).flow(pb);
+    }
 }
 
 // export class FlowRestrictor {

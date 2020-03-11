@@ -114,8 +114,6 @@ bin
 /extra-tests/nodejs/mini-semaphore
 
 /dist
-/extra-tests
 memo*
 raw-type-volume-map.js
 extra-tests/web/mini-semaphore/webpack
-/tslint.json

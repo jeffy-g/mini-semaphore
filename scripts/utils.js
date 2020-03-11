@@ -105,7 +105,7 @@ function createLogStreamAndResolvePath(logPath) {
  * 
  * @param {string|NodeJS.ReadableStream|Buffer} content text? content.
  * @param {string} dest content output path
- * @param {() => void} callback the callback function
+ * @param {() => void} [callback] the callback function
  */
 function writeTextUTF8(content, dest, callback = null) {
     // need dest parent dir check.
@@ -116,6 +116,7 @@ function writeTextUTF8(content, dest, callback = null) {
         console.log("WriteStream.error evnet!", arguments);
     })
     .on("close", function(/*no args*/) {
+        // DEVNOTE: this event never occurs when WriteStream.write returned `true`
         console.log("[close] %s, stream closed", dest);
         callback && callback();
     });
@@ -198,15 +199,15 @@ function createWebpackProgressPluginHandler(logFilePath, disableRenderLine = fal
         return `processing ${(pct * 100).toFixed(4)}%`;
     };
 
-	let dotted = 0;
-	const renderDot = () => {
+    let dotted = 0;
+    const renderDot = () => {
         process.stderr.write(".");
         // FIXME: first renderDot line length is not 100
         dotted++;
-		if (dotted % 100 === 0) {
-			process.stderr.write("\n");
-		}
-	};
+        if (dotted % 100 === 0) {
+            process.stderr.write("\n");
+        }
+    };
 
     // (percentage: number, msg: string, moduleProgress?: string, activeModules?: string, moduleName?: string) => void
     /** @type {(percentage: number, message: string, ...args: string[]) => void} */
@@ -216,6 +217,7 @@ function createWebpackProgressPluginHandler(logFilePath, disableRenderLine = fal
         let progressMessage;
         /** @type {((msg?: string) => void) | undefined} */
         const renderer = process.env.CI? renderDot: renderLine;
+        const cwd =  process.cwd(); // or path.resolve();
 
         if (logFilePath !== void 0) {
             const wpp_logger = createLogStreamAndResolvePath(logFilePath);
@@ -237,10 +239,15 @@ function createWebpackProgressPluginHandler(logFilePath, disableRenderLine = fal
             };
         } else {
             wpp_handler = !disableRenderLine? (percentage, message, ...args) => {
-                const [modules, actives] = args;
-                !message && (message = "- done -");
+                let [modules, actives, path = ""] = args;
+                if (message) {
+                    const x = path.lastIndexOf(cwd) + 1;
+                    x > 0 && (path = path.substring(x + cwd.length));
+                } else { // which means all processing done
+                    message = "- done -";
+                }
                 renderer(
-                    formatPercentage(percentage) + " | " + message + ` [${modules}, ${actives}]`
+                    formatPercentage(percentage) + " | " + message + ` [${modules}, ${actives}] ${path}`
                 );
                 percentage === 1 && (console.log(), dotted = 0);
             }: () => {

@@ -1,6 +1,6 @@
 {
   "name": "mini-semaphore",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "A lightweight version of Semaphore",
   "private": false,
   "main": "./cjs/index.js",
@@ -39,11 +39,12 @@
     "typescript"
   ],
   "scripts": {
-    "all": "yarn clean && yarn lint && yarn dist && yarn webpack",
+    "all": "yarn clean && yarn lint && yarn dist && yarn webpack && yarn copy:types",
     "build": "tsc",
     "build:esm": "tsc -p src/tsconfig.json && node ./scripts/tools -cmd rmc -basePath ./build/esm -test \"/.js$/\"",
     "clean": "rimraf build/* dist/* logs/*.tsbuildinfo",
-    "dist": "rimraf dist/!(webpack) && yarn build && yarn build:esm && cpx ./{package.json,README.md,LICENSE} dist -v && cpx \"./build/**/*\" dist -v",
+    "copy:types": "cpx src/index.d.ts dist -v && cpx src/index.d.ts dist/cjs -v && cpx src/index.d.ts dist/esm -v && cpx src/index.d.ts dist/umd -v && cpx src/index.d.ts dist/webpack -v",
+    "dist": "rimraf dist/!(webpack) && yarn build && yarn build:esm && cpx ./{package.json,README.md,LICENSE} dist -v && cpx \"./build/**/*.js\" dist -v",
     "inst:clean": "rimraf yarn.lock node_modules && yarn install",
     "lint": "eslint src/**/*.ts",
     "test": "jest --coverage --silent=false -c=jest.config.js",
@@ -51,23 +52,21 @@
     "webpack": "rimraf ./dist/webpack/* ./dist/umd/* && npx webpack && cpx ./dist/*.d.ts ./dist/webpack/ -v"
   },
   "devDependencies": {
-    "@types/jest": "^25.1.3",
-    "@types/node-fetch": "^2.5.5",
+    "@types/jest": "^25.1.4",
     "@types/webpack": "^4.41.6",
-    "@typescript-eslint/eslint-plugin": "^2.21.0",
-    "@typescript-eslint/eslint-plugin-tslint": "^2.21.0",
-    "@typescript-eslint/parser": "^2.21.0",
+    "@typescript-eslint/eslint-plugin": "^2.23.0",
+    "@typescript-eslint/eslint-plugin-tslint": "^2.23.0",
+    "@typescript-eslint/parser": "^2.23.0",
     "cpx": "latest",
     "eslint": "^6.8.0",
     "jest": "^25.1.0",
-    "node-fetch": "latest",
     "rimraf": "^3.0.2",
     "rm-cstyle-cmts": "latest",
     "terser-webpack-plugin": "^2.3.5",
     "ts-jest": "^25.2.1",
     "ts-loader": "^6.2.1",
     "typescript": "^3.8.3",
-    "webpack": "^4.41.6",
+    "webpack": "^4.42.0",
     "webpack-cli": "^3.3.11"
   }
 }
