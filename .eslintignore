@@ -2,3 +2,4 @@ dist
 build
 scripts
 extra-tests
+__tests__

@@ -14,6 +14,9 @@
   "bugs": {
     "url": "https://github.com/jeffy-g/mini-semaphore/issues"
   },
+  "defs": {
+    "regex": "/,\\s?\\w\\.t\\s?=[^]+(?=,\\s?i\\.o)/"
+  },
   "homepage": "https://github.com/jeffy-g/mini-semaphore#readme",
   "repository": {
     "type": "git",
@@ -49,7 +52,8 @@
     "lint": "eslint src/**/*.ts",
     "test": "jest --coverage --silent=false -c=jest.config.js",
     "update:packages": "yarn upgrade-interactive --latest",
-    "webpack": "rimraf ./dist/webpack/* ./dist/umd/* && npx webpack && cpx ./dist/*.d.ts ./dist/webpack/ -v"
+    "webpack": "rimraf ./dist/webpack/* ./dist/umd/* && npx webpack && yarn webpack:strip && cpx ./dist/*.d.ts ./dist/webpack/ -v",
+    "webpack:strip": "node ./scripts/tools -cmd stripWebpack -regex \"%npm_package_defs_regex%\""
   },
   "devDependencies": {
     "@types/jest": "^25.1.4",

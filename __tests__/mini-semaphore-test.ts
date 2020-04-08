@@ -7,6 +7,12 @@ import {
     restrictor
 } from "../src/"; // or "../dist/webpack/"
 
+// import {
+//     TFlowableLock, MiniSemaphore, create,
+//     Deque,
+//     restrictor
+// } from "../dist/webpack/";
+
 
 const WAIT = 5;
 const delay = (ms: number) => new Promise<void>(r => setTimeout(r, ms));

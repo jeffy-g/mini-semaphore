@@ -282,9 +282,24 @@ function createBrowserifyFileEventLogger(logFilePath) {
     };
     return logger;
 }
+/**
+ * concatenate `content` to the beginning of each element of `str_array`
+ * 
+ * @param {string} content append content
+ * @param {string[]} str_array the string array of dest
+ * @date 2020/2/16
+ */
+function appendStringTo(str_array, content, suffix = "") {
+    /** @type {string} */
+    let target;
+    for (let i = 0; target = str_array[i];) {
+        str_array[i++] = `${content}${suffix}${target}`
+    }
+}
 
 
 module.exports = {
+    appendStringTo,
     getExtraArgs,
     writeTextUTF8,
     readTextUTF8,
