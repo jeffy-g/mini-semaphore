@@ -1,5 +1,12 @@
 {
-  "extends": [
-    "config:base"
-  ]
+    "extends": [
+        "config:base"
+    ],
+    "statusCheckVerify": true,
+    //"ignoreDeps": [
+    //    "node-fetch"
+    //],
+    "automerge": true,
+    "automergeType": "branch",
+    "rangeStrategy": "bump"
 }
