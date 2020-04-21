@@ -1,9 +1,13 @@
 {
     "extends": [
-        "config:base"
+        "config:base", "schedule:daily"
     ],
     "statusCheckVerify": true,
     "automerge": true,
     "automergeType": "branch",
-    "rangeStrategy": "bump"
+    "rangeStrategy": "bump",
+    "bumpVersion": "patch",
+    "minor": {
+        "groupName": "all dependencies"
+    }
 }
