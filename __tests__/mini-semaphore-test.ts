@@ -167,7 +167,7 @@ describe("concurrency", function() {
             const start = performance.now();
             await Promise.all(
                 [1,2,3,4,5].map(
-                    i => s.flow(task(i))//.catch(reason => e = reason)
+                    i => s.flow(task(i)).catch(reason => e = reason)
                 )
             ).catch(() => e = "apple pie");
             const tspent = performance.now() - start;
