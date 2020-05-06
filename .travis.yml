@@ -1,0 +1,27 @@
+os:
+  - linux
+  - osx
+
+language: node_js
+node_js:
+  - '14'
+  - '10'
+
+dist: trusty
+sudo: false
+cache:
+  yarn: true
+  directories:
+    - node_modules
+
+before_install:
+  - npm i -g yarn
+
+install:
+  - yarn install
+
+before_script: |
+  yarn all
+
+script:
+  - yarn test
