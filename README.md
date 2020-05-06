@@ -1,4 +1,4 @@
-![GitHub](https://img.shields.io/github/license/jeffy-g/mini-semaphore?style=plastic)
+[![Build Status](https://travis-ci.com/jeffy-g/mini-semaphore.svg?branch=master)](https://travis-ci.com/jeffy-g/mini-semaphore) ![GitHub](https://img.shields.io/github/license/jeffy-g/mini-semaphore?style=plastic)
 
 # Mini Semaphore (mini-semaphore
 
