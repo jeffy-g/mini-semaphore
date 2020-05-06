@@ -50,13 +50,13 @@
     "build": "tsc",
     "build:esm": "tsc -p src/tsconfig.json && node ./scripts/tools -cmd rmc -basePath ./build/esm -test \"/.js$/\"",
     "clean": "rimraf build/* dist/* logs/*.tsbuildinfo",
-    "copy:types": "cpx src/index.d.ts dist -v && cpx src/index.d.ts dist/cjs -v && cpx src/index.d.ts dist/esm -v && cpx src/index.d.ts dist/umd -v && cpx src/index.d.ts dist/webpack -v",
-    "dist": "rimraf dist/!(webpack) && yarn build && yarn build:esm && cpx ./{package.json,README.md,LICENSE} dist -v && cpx \"./build/**/*.js\" dist -v",
+    "copy:types": "cpx -v src/index.d.ts dist && cpx -v src/index.d.ts dist/cjs && cpx -v src/index.d.ts dist/esm && cpx -v src/index.d.ts dist/umd && cpx -v src/index.d.ts dist/webpack",
+    "dist": "rimraf \"dist/!(webpack)\" && yarn build && yarn build:esm && cpx -v \"./{package.json,README.md,LICENSE}\" dist && cpx -v \"./build/**/*.js\" dist",
     "inst:clean": "rimraf yarn.lock node_modules && yarn install",
     "lint": "eslint src/**/*.ts",
     "test": "jest --coverage --silent=false -c=jest.config.js",
     "update:packages": "yarn upgrade-interactive --latest",
-    "webpack": "rimraf ./dist/webpack/* ./dist/umd/* && npx webpack && yarn webpack:strip && cpx ./dist/*.d.ts ./dist/webpack/ -v",
+    "webpack": "rimraf ./dist/webpack/* ./dist/umd/* && npx webpack && yarn webpack:strip && cpx -v \"./dist/*.d.ts\" ./dist/webpack/",
     "webpack:strip": "node ./scripts/tools -cmd stripWebpack -regex \"%npm_package_defs_regex%\""
   },
   "devDependencies": {
