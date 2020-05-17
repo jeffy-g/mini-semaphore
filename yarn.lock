@@ -5040,10 +5040,10 @@ ripemd160@^2.0.0, ripemd160@^2.0.1:
     hash-base "^3.0.0"
     inherits "^2.0.1"
 
-rm-cstyle-cmts@2.4.0:
-  version "2.4.0"
-  resolved "https://registry.yarnpkg.com/rm-cstyle-cmts/-/rm-cstyle-cmts-2.4.0.tgz#eb9732fa939d524494c2fd48a9f91b1516b48679"
-  integrity sha512-cpfR6L6SMX5KMRWy0En75j3YzczVkfNGbxeTRpYLKH2FLtLrXG/2vgsi39ySJ/WbZif3A4YhKgNLOKm/ENwYjQ==
+rm-cstyle-cmts@3.2.4:
+  version "3.2.4"
+  resolved "https://registry.yarnpkg.com/rm-cstyle-cmts/-/rm-cstyle-cmts-3.2.4.tgz#2e7fee5cf94b1353fe3fb67eed42968cf14d587a"
+  integrity sha512-EdAYXfaV347uyLv+1P4/VOGM8IQUaICXD3wwjMU5IPnT3xIOIwJZei+KZtKVMYWb8L72wyMwPxUlRLGPSFe9vQ==
 
 rsvp@^4.8.4:
   version "4.8.5"
