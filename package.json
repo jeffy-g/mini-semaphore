@@ -1,6 +1,6 @@
 {
   "name": "mini-semaphore",
-  "version": "1.1.13",
+  "version": "1.1.14",
   "description": "A lightweight version of Semaphore",
   "private": false,
   "main": "./cjs/index.js",
@@ -61,12 +61,12 @@
     "webpack:strip": "node ./scripts/tools -cmd stripWebpack -regex \"%npm_package_defs_regex%\""
   },
   "devDependencies": {
-    "@types/jest": "^25.2.2",
+    "@types/jest": "^25.2.3",
     "@types/node-fetch": "^2.5.7",
     "@types/webpack": "^4.41.13",
-    "@typescript-eslint/eslint-plugin": "^2.33.0",
-    "@typescript-eslint/eslint-plugin-tslint": "^2.33.0",
-    "@typescript-eslint/parser": "^2.33.0",
+    "@typescript-eslint/eslint-plugin": "^2.34.0",
+    "@typescript-eslint/eslint-plugin-tslint": "^2.34.0",
+    "@typescript-eslint/parser": "^2.34.0",
     "concurrently": "^5.2.0",
     "cpx": "latest",
     "eslint": "^7.0.0",
