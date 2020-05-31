@@ -1,6 +1,6 @@
 {
   "name": "mini-semaphore",
-  "version": "1.1.19",
+  "version": "1.1.20",
   "description": "A lightweight version of Semaphore",
   "private": false,
   "main": "./cjs/index.js",
@@ -63,7 +63,7 @@
   "devDependencies": {
     "@types/jest": "^25.2.3",
     "@types/node-fetch": "^2.5.7",
-    "@types/webpack": "^4.41.13",
+    "@types/webpack": "^4.41.16",
     "@typescript-eslint/eslint-plugin": "^3.0.2",
     "@typescript-eslint/eslint-plugin-tslint": "^3.0.2",
     "@typescript-eslint/parser": "^3.0.2",
@@ -75,7 +75,7 @@
     "rimraf": "^3.0.2",
     "rm-cstyle-cmts": "3.2.6",
     "terser-webpack-plugin": "^3.0.2",
-    "ts-jest": "^26.0.0",
+    "ts-jest": "^26.1.0",
     "ts-loader": "^7.0.5",
     "tslint": "^6.1.2",
     "typescript": "^3.9.3",
