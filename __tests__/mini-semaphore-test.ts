@@ -215,7 +215,7 @@ describe("concurrency", function() {
                 // DEVNOTE: This function returns only created objects
                 const pinger = await restrictor.getLockByKey("ping");
                 promises[i + 1] = pinger.flow( async () => {
-                    await delay(20);
+                    await delay(1000);
                     await pbody("-");
                 });
                 promises[i + 2] = restrictor.one("ping2", async () => {
@@ -236,7 +236,7 @@ describe("concurrency", function() {
             // when more than 1 sec oldies
             const purged = await restrictor.cleanup(1, true);
             expect(purged).not.toBe(0);
-        });
+        }, 10 * 1000);
         // it.each(array)("result tokens", (token) => {
         //     expect(token.split("-")[1]).toMatch(/\d+/);
         // });

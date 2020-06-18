@@ -90,6 +90,7 @@ const get = async (key: string | number, restriction: number) => {
 };
 
 export namespace restrictor {
+
     /**
      * get the semaphore associated with the value of `key`
      * 
@@ -107,13 +108,12 @@ export namespace restrictor {
         return l;
     };
 
-
     /**
      * Eliminate unused instances for the `timeSpan` seconds
      * 
      * @param timeSpan specify unit as seconds
-     * @returns {number} purged count
-     * @todo restriction by mini semaphore
+     * @returns {Promise<number>} eliminated count
+     * @date 2020/6/19
      */
     export const cleanup = async (timeSpan: number, debug?: true): Promise<number> => {
 
@@ -123,21 +123,22 @@ export namespace restrictor {
         const currentLocks = locks;
         const newLocks: typeof locks = Object.create(null);
         const keys = Object.keys(currentLocks);
-        let purgeCount = 0;
-        let purgedKeys: string[];
+        let eliminatedCount = 0;
+        let eliminatedKeys: string[];
 
+        !timeSpan && (timeSpan = 1); // avoid implicit bug
         timeSpan *= 1000;
         if (debug) {
-            purgedKeys = [];
+            eliminatedKeys = [];
         }
 
         for (let i = 0, end = keys.length; i < end;) {
             const key = keys[i++];
             const s = currentLocks[key];
             if (s.last && Date.now() - s.last >= timeSpan) {
-                purgeCount++;
+                eliminatedCount++;
                 if (debug) {
-                    purgedKeys!.push(key);
+                    eliminatedKeys!.push(key);
                 }
                 continue;
             }
@@ -152,26 +153,15 @@ export namespace restrictor {
 
         if (debug) {
             console.log(
-                `purged: [\n${purgedKeys!.join(",\n")}\n]` +
+                `purged: [\n${eliminatedKeys!.join(",\n")}\n]` +
                 "\n" +
                 `lived:  [\n${Object.keys(newLocks).join(",\n")}\n]`
             );
         }
 
-        return purgeCount;
+        return eliminatedCount;
     };
 
-    /**
-     * @param key 
-     * @param restriction 
-     * @param pb 
-     */
-    const fire = async <T>(key: string | number, restriction: number, pb: () => Promise<T>) => {
-        const s = await get(key, restriction);
-        const result = s.flow(pb);
-        s.last = Date.now();
-        return result;
-    };
     /**
      * Allocate a semaphore for each `key`, and limit the number of shares with the value of `restriction`
      * 
@@ -180,16 +170,12 @@ export namespace restrictor {
      * @param pb the process body
      */
     export async function multi<T>(key: string | number, restriction: number, pb: () => Promise<T>) {
-        // return get(key, restriction).flow(pb);
-        return fire(key, restriction, pb);
-        // const s = get(key, restriction);
-        // await s.acquire();
-        // try {
-        //     return await pb();
-        // } finally {
-        //     s.release();
-        // }
+        const s = await get(key, restriction);
+        const result = s.flow(pb);
+        s.last = Date.now();
+        return result;
     }
+
     /**
      * synonym of `multi(key, 1, pb)`
      * 
@@ -200,7 +186,6 @@ export namespace restrictor {
      * @param pb the process body
      */
     export async function one<T>(key: string | number, pb: () => Promise<T>) {
-        // return get(key, 1).flow(pb);
-        return fire(key, 1, pb);
+        return multi(key, 1, pb);
     }
 }

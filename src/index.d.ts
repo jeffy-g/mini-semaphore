@@ -177,8 +177,8 @@ declare namespace fr {
      * Eliminate unused instances for the `timeSpan` seconds
      * 
      * @param timeSpan specify unit as seconds
-     * @returns {number} purged count
-     * @todo restriction by mini semaphore
+     * @returns {Promise<number>} eliminated count
+     * @date 2020/6/19
      */
     const cleanup: (timeSpan: number, debug?: true | undefined) => Promise<number>;
     /**
