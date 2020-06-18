@@ -233,9 +233,9 @@ describe("concurrency", function() {
             console.log("array: ", array);
 
             restrictor.one("keep", () => Promise.resolve());
-            expect(
-                restrictor.cleanup(1, true)
-            ).not.toBe(0);
+            // when more than 1 sec oldies
+            const purged = await restrictor.cleanup(1, true);
+            expect(purged).not.toBe(0);
         });
         // it.each(array)("result tokens", (token) => {
         //     expect(token.split("-")[1]).toMatch(/\d+/);
