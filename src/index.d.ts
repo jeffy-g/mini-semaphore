@@ -174,6 +174,14 @@ export declare const create: (capacity: number) => IFlowableLock;
 
 declare namespace fr {
     /**
+     * Eliminate unused instances for the `timeSpan` seconds
+     * 
+     * @param timeSpan specify unit as seconds
+     * @returns {number} purged count
+     * @todo restriction by mini semaphore
+     */
+    const cleanup: (timeSpan: number, debug?: true | undefined) => Promise<number>;
+    /**
      * get the semaphore associated with the value of `key`
      *
      *   + ⚠️ The object to be retrieved with `key` must already be created with `multi` ore `one`
@@ -181,7 +189,7 @@ declare namespace fr {
      * @param key
      * @returns `IFlowableLock` instance or `undefined`
      */
-    export const getLockByKey: (key: string | number) => IFlowableLock;
+    export const getLockByKey: (key: string | number) => Promise<IFlowableLock>;
     /**
      * Allocate a semaphore for each `key`, and limit the number of shares with the value of `restriction`
      *
