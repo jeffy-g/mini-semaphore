@@ -76,17 +76,6 @@ function processSources(
 }
 
 const ToolFunctions = {
-    // node ./scripts/tools -cmd rmc [-basePath ./dist]
-    rmc: () => {
-        const rmc = require("rm-cstyle-cmts");
-        processSources(
-            "rm-cstyle-cmts", data => rmc(data), {
-                base: params.basePath,
-                test: /.js$/
-            }
-        );
-    },
-
     // node ./scripts/tools -cmd stripWebpack -regex \"%npm_package_defs_regex%\""
     stripWebpack: () => {
         const re = params.regex;

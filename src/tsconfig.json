@@ -5,7 +5,7 @@
   "compilerOptions": {
 
     "tsBuildInfoFile": "../logs/esm.tsbuildinfo",
-    "removeComments": false,
+    // "removeComments": false,
 
     "module": "esnext",
 

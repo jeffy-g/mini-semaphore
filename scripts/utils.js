@@ -259,30 +259,6 @@ function createWebpackProgressPluginHandler(logFilePath, disableRenderLine = fal
     return wpp_handler;
 }
 /**
- * logger for browserify
- * 
- * @param {string} logFilePath log output path name.
- */
-function createBrowserifyFileEventLogger(logFilePath) {
-
-    const log = createLogStreamAndResolvePath(logFilePath);
-    /**
-     * write browserify file event data.
-     * 
-     * @type {(counter: number, message: string, ...args: string[]) => void} */
-    const logger = (counter, message, ...args) => {
-        if (counter === void 0) {
-            log.end();
-            return;
-        }
-        const progressMessage = `resolve - ${counter}`;
-        log.write(`${progressMessage}, ${message}: ${args}\n`, () => {
-            renderLine(progressMessage);
-        });
-    };
-    return logger;
-}
-/**
  * concatenate `content` to the beginning of each element of `str_array`
  * 
  * @param {string} content append content
@@ -306,5 +282,4 @@ module.exports = {
     walkDirSync,
     renderLine,
     createWebpackProgressPluginHandler,
-    createBrowserifyFileEventLogger,
 };
