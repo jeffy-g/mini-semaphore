@@ -153,9 +153,9 @@ export namespace restrictor {
 
         if (debug) {
             console.log(
-                `purged: [\n${eliminatedKeys!.join(",\n")}\n]` +
+                `eliminated: [\n${eliminatedKeys!.join(",\n")}\n]` +
                 "\n" +
-                `lived:  [\n${Object.keys(newLocks).join(",\n")}\n]`
+                `lived: [\n${Object.keys(newLocks).join(",\n")}\n]`
             );
         }
 
