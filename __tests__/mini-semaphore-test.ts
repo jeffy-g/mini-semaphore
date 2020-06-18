@@ -231,6 +231,11 @@ describe("concurrency", function() {
                 // expect(token.split("-")[1]).toMatch(/\d+/);
             });
             console.log("array: ", array);
+
+            restrictor.one("keep", () => Promise.resolve());
+            expect(
+                restrictor.cleanup(1, true)
+            ).not.toBe(0);
         });
         // it.each(array)("result tokens", (token) => {
         //     expect(token.split("-")[1]).toMatch(/\d+/);

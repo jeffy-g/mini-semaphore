@@ -36,6 +36,19 @@ import {
     IFlowableLock
 } from "./class";
 
+
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+//                            constants, types
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+/**
+ * @internal
+ * @date 2020/6/18
+ */
+interface IFlowableLockWithTimeStamp extends IFlowableLock {
+    last?: number;
+}
+
+
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 //                       class or namespace exports.
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -43,7 +56,7 @@ const { MiniSemaphore: MS } = c;
 /**
  * 
  */
-const locks: Record<string | number, IFlowableLock> = {};
+let locks: Record<string | number, IFlowableLockWithTimeStamp> = Object.create(null);
 /**
  * 
  * @param key 
@@ -73,6 +86,65 @@ export namespace restrictor {
      * @returns `IFlowableLock` instance or `undefined`
      */
     export const getLockByKey = (key: string | number) => locks[key];
+
+
+    /**
+     * Eliminate unused instances for the `timeSpan` seconds
+     * 
+     * @param timeSpan specify unit as seconds
+     * @returns {number} purged count
+     * @todo restriction by mini semaphore
+     */
+    export const cleanup = (timeSpan: number, debug?: true): number => {
+        const currentLocks = locks;
+        const newLocks: typeof locks = Object.create(null);
+        const keys = Object.keys(currentLocks);
+        let purgeCount = 0;
+        let purgedKeys: string[];
+
+        timeSpan *= 1000;
+        if (debug) {
+            purgedKeys = [];
+        }
+
+        for (let i = 0, end = keys.length; i < end;) {
+            const key = keys[i++];
+            const s = currentLocks[key];
+            if (s.last && Date.now() - s.last >= timeSpan) {
+                purgeCount++;
+                if (debug) {
+                    purgedKeys!.push(key);
+                }
+                continue;
+            }
+            newLocks[key] = s;
+        }
+
+        // update lock registry
+        locks = newLocks;
+
+        if (debug) {
+            console.log(
+                `purged: [\n${purgedKeys!.join(",\n")}\n]` +
+                "\n" +
+                `lived:  [\n${Object.keys(newLocks).join(",\n")}\n]`
+            );
+        }
+
+        return purgeCount;
+    };
+
+    /**
+     * @param key 
+     * @param restriction 
+     * @param pb 
+     */
+    const fire = async <T>(key: string | number, restriction: number, pb: () => Promise<T>) => {
+        const s = get(key, restriction);
+        const result = s.flow(pb);
+        s.last = Date.now();
+        return result;
+    };
     /**
      * Allocate a semaphore for each `key`, and limit the number of shares with the value of `restriction`
      * 
@@ -81,7 +153,8 @@ export namespace restrictor {
      * @param pb the process body
      */
     export async function multi<T>(key: string | number, restriction: number, pb: () => Promise<T>) {
-        return get(key, restriction).flow(pb);
+        // return get(key, restriction).flow(pb);
+        return fire(key, restriction, pb);
         // const s = get(key, restriction);
         // await s.acquire();
         // try {
@@ -100,48 +173,7 @@ export namespace restrictor {
      * @param pb the process body
      */
     export async function one<T>(key: string | number, pb: () => Promise<T>) {
-        return get(key, 1).flow(pb);
+        // return get(key, 1).flow(pb);
+        return fire(key, 1, pb);
     }
 }
-
-// export class FlowRestrictor {
-//     /**
-//      * 
-//      */
-//     private locks: Record<string | number, IFlowableLock> = {};
-//     // constructor() {}
-//     /**
-//      * 
-//      * @param key 
-//      * @param restriction 
-//      */
-//     private get(key: string | number, restriction: number) {
-//         let lock = this.locks[key];
-//         if (!lock) {
-//             this.locks[key] = lock = new MS(restriction);
-//         }
-//         return lock;
-//     }
-//     /**
-//      * Allocate a semaphore for each `key`, and limit the number of shares with the value of` restriction`
-//      * 
-//      * @param key number or string as tag
-//      * @param restriction number of process restriction
-//      * @param pb the process body
-//      */
-//     async multi<T>(key: string | number, restriction: number, pb: () => Promise<T>) {
-//         return this.get(key, restriction).flow(pb);
-//     }
-//     /**
-//      * synonym of `multi(key, 1, pb)`
-//      * 
-//      *  + use case
-//      *    * Avoid concurrent requests to the same url
-//      * 
-//      * @param key number or string as tag
-//      * @param pb the process body
-//      */
-//     async one<T>(key: string | number, pb: () => Promise<T>) {
-//         return this.multi(key, 1, pb);
-//     }
-// }
