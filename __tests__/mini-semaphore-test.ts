@@ -213,7 +213,7 @@ describe("concurrency", function() {
                     await pbody("-");
                 });
                 // DEVNOTE: This function returns only created objects
-                const pinger = restrictor.getLockByKey("ping");
+                const pinger = await restrictor.getLockByKey("ping");
                 promises[i + 1] = pinger.flow( async () => {
                     await delay(20);
                     await pbody("-");
@@ -259,7 +259,7 @@ describe("concurrency", function() {
             text = "";
             let error: Error | null = null;
             try {
-                const s = restrictor.getLockByKey("pping");
+                const s = await restrictor.getLockByKey("pping");
                 await s.flow(async () => {
                     text = await fetch(URL).then(res => res.text());
                 });

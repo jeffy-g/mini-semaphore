@@ -40,6 +40,12 @@ import {
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 //                            constants, types
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+const { MiniSemaphore: MS } = c;
+
+/**
+ * @internal
+ */
+const internalLock = new MS(1);
 /**
  * @internal
  * @date 2020/6/18
@@ -52,7 +58,6 @@ interface IFlowableLockWithTimeStamp extends IFlowableLock {
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 //                       class or namespace exports.
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-const { MiniSemaphore: MS } = c;
 /**
  * 
  */
@@ -63,16 +68,24 @@ let locks: Record<string | number, IFlowableLockWithTimeStamp> = Object.create(n
  * @param restriction 
  * @throws when different restriction
  */
-const get = (key: string | number, restriction: number) => {
+const get = async (key: string | number, restriction: number) => {
+    // acquire internal lock
+    await internalLock.acquire(false);
+
     let lock = locks[key];
     if (!lock) {
         locks[key] = lock = new MS(restriction);
     }
     if (lock.limit !== restriction) {
+        // release internal lock
+        internalLock.release();
         throw new ReferenceError(
             `Cannot get object with different restriction: key: '${key}', lock.limit: ${lock.limit} <-> restriction: ${restriction},`
         );
     }
+
+    // release internal lock
+    internalLock.release();
     return lock;
 };
 
@@ -85,7 +98,14 @@ export namespace restrictor {
      * @param key 
      * @returns `IFlowableLock` instance or `undefined`
      */
-    export const getLockByKey = (key: string | number) => locks[key];
+    export const getLockByKey = async (key: string | number) => {
+        // acquire internal lock
+        await internalLock.acquire(false);
+        const l = locks[key];
+        // release internal lock
+        internalLock.release();
+        return l;
+    };
 
 
     /**
@@ -95,7 +115,11 @@ export namespace restrictor {
      * @returns {number} purged count
      * @todo restriction by mini semaphore
      */
-    export const cleanup = (timeSpan: number, debug?: true): number => {
+    export const cleanup = async (timeSpan: number, debug?: true): Promise<number> => {
+
+        // acquire internal lock
+        await internalLock.acquire(false);
+
         const currentLocks = locks;
         const newLocks: typeof locks = Object.create(null);
         const keys = Object.keys(currentLocks);
@@ -123,6 +147,9 @@ export namespace restrictor {
         // update lock registry
         locks = newLocks;
 
+        // release internal lock
+        internalLock.release();
+
         if (debug) {
             console.log(
                 `purged: [\n${purgedKeys!.join(",\n")}\n]` +
@@ -140,7 +167,7 @@ export namespace restrictor {
      * @param pb 
      */
     const fire = async <T>(key: string | number, restriction: number, pb: () => Promise<T>) => {
-        const s = get(key, restriction);
+        const s = await get(key, restriction);
         const result = s.flow(pb);
         s.last = Date.now();
         return result;
