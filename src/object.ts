@@ -25,7 +25,7 @@
 */
 /**
  * @file minimal implementation of semaphore (object implementation
- * @author jeffy-g hirotom1107@gmail.com
+ * @author jeffy-g <hirotom1107@gmail.com>
  * @version 1.0
  */
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
