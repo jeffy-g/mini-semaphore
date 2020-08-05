@@ -74,7 +74,7 @@
     "node-fetch": "^2.6.0",
     "organize-pkg": "^1.2.2",
     "rimraf": "^3.0.2",
-    "terser-webpack-plugin": "^3.0.8",
+    "terser-webpack-plugin": "^4.0.0",
     "ts-jest": "^26.1.4",
     "ts-loader": "^8.0.2",
     "tslint": "^6.1.3",
