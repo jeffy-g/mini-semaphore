@@ -11,10 +11,18 @@ module.exports = {
     },
     "plugins": [
         "@typescript-eslint",
-        "@typescript-eslint/tslint"
+        // "@typescript-eslint/tslint"
     ],
     "rules": {
-        "@typescript-eslint/indent": "error",
+        // "@typescript-eslint/indent": "error",
+        "indent": ["warn", 4, {
+            "SwitchCase": 1
+        }],
+        // see https://github.com/typescript-eslint/typescript-eslint/tree/master/packages/eslint-plugin#supported-rules
+        "@typescript-eslint/array-type": ["warn", {
+            "default": "array-simple"
+        }],
+        // "@typescript-eslint/await-thenable": 1, // DEVNOTE: error...
         "@typescript-eslint/member-delimiter-style": [
             "error",
             {
@@ -30,34 +38,38 @@ module.exports = {
         ],
         "@typescript-eslint/no-require-imports": "error",
         "@typescript-eslint/no-var-requires": "error",
-        "@typescript-eslint/prefer-function-type": "off",
-        "@typescript-eslint/quotes": [
-            "error",
-            "double",
-            {
-                "avoidEscape": true
+        "prefer-function-type": "off",
+
+        quotes: ["error", "double", { "avoidEscape": true }],
+
+        "semi": ["error", "always"],
+        "semi-spacing": ["error", {"after": true, "before": false}],
+        "semi-style": ["error", "last"],
+        "no-extra-semi": "error",
+        "no-unexpected-multiline": "error",
+        "no-unreachable": "error",
+
+        "camelcase": [
+            "error", {
+                allow: [
+                    "[\\w_]+"
+                ]
             }
         ],
-        "@typescript-eslint/semi": [
-            "error",
-            "always"
-        ],
-        "camelcase": "error",
         "comma-dangle": "off",
         "curly": [
             "error",
             "multi-line"
         ],
-        "id-blacklist": "error",
-        "id-match": "error",
+        "id-denylist": "error",
+        "id-match": "error", // see https://eslint.org/docs/rules/id-match
         "max-classes-per-file": [
             "error",
             4
         ],
         "max-len": [
-            "error",
-            {
-                "code": 1500
+            "error", {
+                "code": 1500, "comments": 250
             }
         ],
         "no-cond-assign": "off",
