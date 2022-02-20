@@ -40,12 +40,6 @@ import {
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 //                            constants, types
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-const { MiniSemaphore: MS } = c;
-
-/**
- * @internal
- */
-const internalLock = new MS(1);
 /**
  * @internal
  * @date 2020/6/18
@@ -59,37 +53,45 @@ interface IFlowableLockWithTimeStamp extends IFlowableLock {
 //                       class or namespace exports.
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 /**
- * 
+ * Flow Restriction
  */
-let locks: Record<string | number, IFlowableLockWithTimeStamp> = Object.create(null);
-/**
- * 
- * @param key 
- * @param restriction 
- * @throws when different restriction
- */
-const get = async (key: string | number, restriction: number) => {
-    // acquire internal lock
-    await internalLock.acquire(false);
+export namespace restrictor {
 
-    let lock = locks[key];
-    if (!lock) {
-        locks[key] = lock = new MS(restriction);
-    }
-    if (lock.limit !== restriction) {
+    const { MiniSemaphore: MS } = c;
+    /**
+     * @internal
+     */
+    const internalLock = new MS(1);
+    /**
+     * 
+     */
+    let locks: Record<string | number, IFlowableLockWithTimeStamp> = Object.create(null);
+    /**
+     * 
+     * @param key 
+     * @param restriction 
+     * @throws when different restriction
+     */
+    const get = async (key: string | number, restriction: number) => {
+        // acquire internal lock
+        await internalLock.acquire(false);
+    
+        let lock = locks[key];
+        if (!lock) {
+            locks[key] = lock = new MS(restriction);
+        }
+        if (lock.limit !== restriction) {
+            // release internal lock
+            internalLock.release();
+            throw new ReferenceError(
+                `Cannot get object with different restriction: key: '${key}', lock.limit: ${lock.limit} <-> restriction: ${restriction},`
+            );
+        }
+    
         // release internal lock
         internalLock.release();
-        throw new ReferenceError(
-            `Cannot get object with different restriction: key: '${key}', lock.limit: ${lock.limit} <-> restriction: ${restriction},`
-        );
-    }
-
-    // release internal lock
-    internalLock.release();
-    return lock;
-};
-
-export namespace restrictor {
+        return lock;
+    };
 
     /**
      * get the semaphore associated with the value of `key`
@@ -175,7 +177,6 @@ export namespace restrictor {
         s.last = Date.now();
         return result;
     }
-
     /**
      * synonym of `multi(key, 1, pb)`
      * 

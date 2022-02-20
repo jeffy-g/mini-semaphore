@@ -1,4 +1,4 @@
-export {
+export type {
     TVoidFunction,
     IFlowableLock, ISimplifiedLock, TFlowableLock
 } from "./core";

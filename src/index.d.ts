@@ -32,8 +32,8 @@ export declare class Deque<T extends any> {
     /**
      * @param s subject
      */
-    push(s: T): number;
-    shift(): T | undefined;
+    push(s: T): void;
+    // shift(): T | undefined;
     clear(): void;
     get length(): number;
 }
@@ -94,8 +94,8 @@ export declare type TFlowableLock<T = TVoidFunction> = IFlowableLock & {
     readonly q: Deque<T>;
 };
 export declare type TVoidFunction = () => void;
-export declare const acquire: (dis: TFlowableLock<TVoidFunction>, lazy?: boolean) => Promise<void>;
-export declare const release: (dis: TFlowableLock<TVoidFunction>) => void;
+// export declare const acquire: (dis: TFlowableLock<TVoidFunction>, lazy?: boolean) => Promise<void>;
+// export declare const release: (dis: TFlowableLock<TVoidFunction>) => void;
 
 
 /**

@@ -84,7 +84,7 @@ export class Deque<T extends any> {
     /**
      * @param s subject
      */
-    push(s: T): number {
+    push(s: T): void {
         const l = this._l;
 
         /* https://coderwall.com/p/zbc2zw/the-comment-toggle-trick
@@ -97,8 +97,7 @@ export class Deque<T extends any> {
         const i = (this._f + l) & (this._c - 1);
         this._a[i] = s;
         this._l = l + 1;
-
-        return l + 1;
+        // return l + 1;
     }
 
     // pop() {
@@ -129,19 +128,19 @@ export class Deque<T extends any> {
         return r;
     }
 
-    // this._a.forEach(n => n && console.log(n));
-    /* istanbul ignore next */
-    clear() {
-        const l = this._l;
-        const f = this._f;
-        const c = this._c;
-        const a = this._a;
-        for (let j = 0; j < l; ++j) {
-            a[(f + j) & (c - 1)] = void 0 as unknown as T;
-        }
-        this._l = 0;
-        this._f = 0;
-    }
+    // // this._a.forEach(n => n && console.log(n));
+    // /* istanbul ignore next */
+    // clear() {
+    //     const l = this._l;
+    //     const f = this._f;
+    //     const c = this._c;
+    //     const a = this._a;
+    //     for (let j = 0; j < l; ++j) {
+    //         a[(f + j) & (c - 1)] = void 0 as unknown as T;
+    //     }
+    //     this._l = 0;
+    //     this._f = 0;
+    // }
 
     get length(): number {
         return this._l;
