@@ -4,8 +4,9 @@ os:
 
 language: node_js
 node_js:
+  - '16'
   - '14'
-  - '10'
+  - '12'
 
 dist: trusty
 sudo: false
