@@ -130,7 +130,7 @@ describe("concurrency", function() {
                 await s.flow(task(2));
             } catch (err) {
                 erred++;
-                e = err;
+                e = err as Error;
             }
             await s.flow(task(3));
             await s.flow(task(4));
@@ -167,7 +167,7 @@ describe("concurrency", function() {
             const start = performance.now();
             await Promise.all(
                 [1,2,3,4,5].map(
-                    i => s.flow(task(i)).catch(reason => e = reason)
+                    i => s.flow(task(i)).catch(reason => e = reason as Error)
                 )
             ).catch(() => e = "apple pie");
             const tspent = performance.now() - start;
@@ -232,7 +232,7 @@ describe("concurrency", function() {
             });
             console.log("array: ", array);
 
-            restrictor.one("keep", () => Promise.resolve());
+            await restrictor.one("keep", () => Promise.resolve());
             // when more than 1 sec oldies
             const purged = await restrictor.cleanup(1, true);
             expect(purged).not.toBe(0);
@@ -265,7 +265,7 @@ describe("concurrency", function() {
                 });
             } catch (e) {
                 console.warn(e);
-                error = e;
+                error = e as Error;
             }
             assert(error instanceof TypeError);
             assert.equal(text, "");
@@ -278,7 +278,7 @@ describe("concurrency", function() {
                 });
             } catch (e) {
                 console.warn(e);
-                error = e;
+                error = e as Error;
             }
             assert.equal(text, "");
             assert(error instanceof ReferenceError);

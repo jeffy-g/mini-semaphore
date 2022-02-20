@@ -75,7 +75,7 @@ export namespace restrictor {
     const get = async (key: string | number, restriction: number) => {
         // acquire internal lock
         await internalLock.acquire(false);
-    
+
         let lock = locks[key];
         if (!lock) {
             locks[key] = lock = new MS(restriction);
@@ -87,7 +87,7 @@ export namespace restrictor {
                 `Cannot get object with different restriction: key: '${key}', lock.limit: ${lock.limit} <-> restriction: ${restriction},`
             );
         }
-    
+
         // release internal lock
         internalLock.release();
         return lock;
