@@ -1,11 +1,14 @@
-
+//
+// DEVNOTE: 2022/2/21 - fix node esm module emits syntax error
+//
 module.exports = {
-  // // preset: "ts-jest",
-  // globals: {
-  //   "ts-jest": {
-  //     "tsConfig": "./tsconfig.json"
-  //   }
-  // },
+  preset: "ts-jest/presets/default-esm", // MUST
+  globals: {
+    "ts-jest": {
+      // tsconfig: "./src/tsconfig.json", // <- needless
+      useESM: true
+    }
+  },
   // this is optional?
   testEnvironment: "node",
   verbose: true,

@@ -1,4 +1,4 @@
-import * as assert from "assert";
+import assert from "assert";
 import { performance } from "perf_hooks";
 import fetch from "node-fetch";
 
