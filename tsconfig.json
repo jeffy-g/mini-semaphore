@@ -2,6 +2,9 @@
   "compilerOptions": {
     "incremental": true,
     "tsBuildInfoFile": "./logs/cjs.tsbuildinfo",
+
+    "skipDefaultLibCheck": true,
+    "skipLibCheck": true,
     // TIP: on ts v3.8
     // When this option is enabled, TypeScript will avoid rechecking/rebuilding all truly possibly-affected files,
     // and only recheck/rebuild files that have changed as well as files that directly import them.
