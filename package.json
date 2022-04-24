@@ -57,8 +57,7 @@
     "up": "yarn upgrade-interactive --latest",
     "lint": "eslint src/**/*.ts",
     "test": "bash -c \"NODE_OPTIONS=--experimental-vm-modules npx jest --coverage --silent=false -c=jest.config.js\"",
-    "webpack": "rimraf ./dist/webpack/* ./dist/umd/* && npx webpack && yarn webpack:strip && cpx -v \"./dist/*.d.ts\" ./dist/webpack/",
-    "webpack:strip": "node ./scripts/tools -cmd stripWebpack -regex \"%npm_package_defs_regex%\""
+    "webpack": "rimraf ./dist/webpack/* ./dist/umd/* && npx webpack && cpx -v \"./dist/*.d.ts\" ./dist/webpack/"
   },
   "devDependencies": {
     "@jeffy-g/cpx": "^1.6.4",
