@@ -84,24 +84,35 @@ describe("concurrency", function() {
         });
 
         it("acquire.then.release and flow test", async function() {
-            const s = new MiniSemaphore(10);
-            const SIZE = 1e3;
-            const array = Array<any>(SIZE).fill(1);
+            const SIZE = 100;
+            const LIMIT = 10;
+            const s = new MiniSemaphore(LIMIT);
+            const array = Array<number>(SIZE).fill(1);
             let total = 0;
-            const promises: Promise<any>[] = [];
+            const promises: Promise<void>[] = [];
             // acquire.then.release
             for (let i = 0, end = array.length; i < end;) {
                 const n = array[i];
-                promises[i++] =  s.acquire().then(() => total += n).then(() => s.release());
+                // accurate acquire
+                promises[i++] =  s.acquire(false).then(() => {
+                    total += n;
+                }).then(() => s.release());
             }
+            // because accurate acquire
+            assert.equal(s.pending, SIZE - LIMIT);
             await Promise.all(promises);
             assert.equal(total, SIZE);
             // flow
             promises.length = 0;
             for (let i = 0, end = array.length; i < end;) {
                 const n = array[i];
-                promises[i++] = s.flow(async () => total += n);
+                // lazy acquire
+                promises[i++] = s.flow(async () => {
+                    total += n;
+                });
             }
+            // because lazy acquire
+            assert.equal(s.pending, 0);
             await Promise.all(promises);
             assert.equal(total, SIZE << 1);
         });
