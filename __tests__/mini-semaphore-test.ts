@@ -136,7 +136,7 @@ describe("concurrency", function() {
             await s.flow(task(4));
             await s.flow(task(5));
             const tspent = performance.now() - start;
-            console.log("tspen:", tspent);
+            console.log("tspent:", tspent);
 
             assert.equal(ran, 4);
             assert.equal(erred, 1);
@@ -171,7 +171,7 @@ describe("concurrency", function() {
                 )
             ).catch(() => e = "apple pie");
             const tspent = performance.now() - start;
-            // console.log("tspen:", tspent);
+            // console.log("tspent:", tspent);
 
             await delay((tspent | 0) + 10);
             if (e instanceof Error) {
