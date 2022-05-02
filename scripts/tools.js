@@ -78,12 +78,19 @@ function processSources(
 const ToolFunctions = {
     // node ./scripts/tools -cmd stripWebpack -regex \"%npm_package_defs_regex%\""
     stripWebpack: () => {
-        const re = params.regex;
+        // https://regex101.com/r/gbUnLk/1
+        const re = params.regex || /!function\s*\((.)\)([^]+)(?=\(.\.restrictor\s*\|\|)/;
         if (re) {
             processSources(
-                "[stripWebpack]", data => data.replace(re, ""), {
+                "[stripWebpack]", data => {
+                    const result = data.replace(re, ($0, $1, $2) => {
+                        console.log("[stripWebpack] hit!");
+                        return `(${$1}=>${$2})`;
+                    });
+                    return result;
+                }, {
                     base: "",
-                    targets: ["./dist/umd/index.js", "./dist/webpack/index.js"]
+                    targets: ["./dist/umd/index.js", "./dist/webpack/index.js", "./dist/webpack-esm/index.mjs"]
                 }
             );
         }

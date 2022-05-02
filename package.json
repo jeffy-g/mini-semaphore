@@ -4,18 +4,17 @@
   "description": "A lightweight version of Semaphore",
   "private": false,
   "main": "./cjs/index.js",
-  "module": "./esm/index.js",
+  "module": "./webpack-esm/index.mjs",
   "unpkg": "./umd/index.js",
   "sideEffects": false,
   "types": "./index.d.ts",
-  "typings": "./index.d.ts",
   "author": "jeffy-g",
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/jeffy-g/mini-semaphore/issues"
   },
   "defs": {
-    "regex": "/,\\s?\\w\\.t\\s?=[^]+(?=,\\s?i\\.o)/"
+    "regex": "!function\\s*\\((.)\\)([^]+)(?=\\(t.restrictor\\s*\\|\\|)"
   },
   "homepage": "https://github.com/jeffy-g/mini-semaphore#readme",
   "repository": {
@@ -34,9 +33,11 @@
     "esm",
     "umd",
     "webpack",
+    "webpack-esm",
     "*.d.ts"
   ],
   "keywords": [
+    "async",
     "lock",
     "mutex",
     "promise",
@@ -46,19 +47,16 @@
     "typescript"
   ],
   "scripts": {
-    "all": "yarn clean && yarn lint && yarn dist && yarn webpack && yarn copy:types",
-    "build": "concurrently -n tsc,build:esm -c blue,yellow \"tsc\" \"yarn build:esm\"",
-    "build:esm": "tsc -p src/tsconfig.json",
+    "all": "yarn clean && yarn lint && yarn dist && yarn fire:tool copytypes",
+    "build": "yarn fire:tool build",
     "clean": "rimraf build/* dist/* logs/*.tsbuildinfo",
-    "copy:dts": "cpx -v src/index.d.ts",
-    "copy:types": "concurrently  \"yarn copy:dts dist\" \"yarn copy:dts dist/cjs\" \"yarn copy:dts dist/esm\" \"yarn copy:dts dist/umd\" \"yarn copy:dts dist/webpack\"",
-    "dist": "rimraf \"dist/!(webpack)\" && yarn build && cpx -v \"./{README.md,LICENSE}\" dist && cpx -v \"./build/**/*.js\" dist && orgpkg -p -k defs, -o dist",
+    "dist": "yarn build && yarn fire:tool distExtra",
+    "fire:tool": "bash scripts/tool.sh",
     "ic": "rimraf yarn.lock node_modules && yarn install",
     "up": "yarn upgrade-interactive --latest",
     "lint": "eslint src/**/*.ts",
     "pretest": "rimraf ./coverage/*",
-    "test": "bash -c \"NODE_OPTIONS=--experimental-vm-modules npx jest --coverage --silent=false -c=jest.config.js\"",
-    "webpack": "rimraf ./dist/webpack/* ./dist/umd/* && npx webpack && cpx -v \"./dist/*.d.ts\" ./dist/webpack/"
+    "test": "bash -c \"NODE_OPTIONS=--experimental-vm-modules npx jest --coverage --silent=false -c=jest.config.js\""
   },
   "devDependencies": {
     "@jeffy-g/cpx": "^1.6.4",

@@ -94,8 +94,6 @@ export declare type TFlowableLock<T = TVoidFunction> = IFlowableLock & {
     readonly q: Deque<T>;
 };
 export declare type TVoidFunction = () => void;
-// export declare const acquire: (dis: TFlowableLock<TVoidFunction>, lazy?: boolean) => Promise<void>;
-// export declare const release: (dis: TFlowableLock<TVoidFunction>) => void;
 
 
 /**
