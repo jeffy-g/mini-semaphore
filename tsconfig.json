@@ -21,7 +21,8 @@
     // TIP: always specify "commonjs" for nodejs. "es6" becomes esma module
     "module": "commonjs",
 
-    "sourceMap": false,
+    // Avoid explicitly setting the `sourceMap` option, for code coverage to indicate the exact line.
+    // "sourceMap": false,
 
     "baseUrl": "./src",
     "outDir": "./build/cjs"

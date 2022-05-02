@@ -8,12 +8,11 @@
  * @param di 
  * @param len 
  */
-const am = (
+const am = /* istanbul ignore next */(
     src: any[], si: number,
     dst: any[], di: number,
     len: number
 ) => {
-    /* istanbul ignore next */
     for (let j = 0; j < len; ++j) {
         dst[j + di] = src[j + si];
         src[j + si] = void 0;
@@ -173,11 +172,10 @@ const rt = <T>(dis: Deque<T>, n: number) => {
     dis._c = n;
     const f = dis._f;
     const l = dis._l;
+    /* istanbul ignore next */
     if (f + l > oc) {
         // move items count
-        /* istanbul ignore next */
         const mc = (f + l) & (oc - 1);
-        /* istanbul ignore next */
         am(dis._a, 0, dis._a, oc, mc);
     }
 };

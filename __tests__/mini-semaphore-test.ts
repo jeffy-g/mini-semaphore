@@ -140,8 +140,8 @@ describe("concurrency", function() {
 
             assert.equal(ran, 4);
             assert.equal(erred, 1);
-
-            assert.equal(e!.message, "bogus");
+            // @ts-ignore 
+            assert.equal(e.message, "bogus");
             assert.equal(s.capacity, 2);
         });
 

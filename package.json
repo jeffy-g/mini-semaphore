@@ -56,6 +56,7 @@
     "ic": "rimraf yarn.lock node_modules && yarn install",
     "up": "yarn upgrade-interactive --latest",
     "lint": "eslint src/**/*.ts",
+    "pretest": "rimraf ./coverage/*",
     "test": "bash -c \"NODE_OPTIONS=--experimental-vm-modules npx jest --coverage --silent=false -c=jest.config.js\"",
     "webpack": "rimraf ./dist/webpack/* ./dist/umd/* && npx webpack && cpx -v \"./dist/*.d.ts\" ./dist/webpack/"
   },

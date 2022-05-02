@@ -1,26 +1,8 @@
-/*
-! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-  The MIT License (MIT)
-
-  Copyright (C) 2020 jeffy-g hirotom1107@gmail.com
-
-  Permission is hereby granted, free of charge, to any person obtaining a copy
-  of this software and associated documentation files (the "Software"), to deal
-  in the Software without restriction, including without limitation the rights
-  to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-  copies of the Software, and to permit persons to whom the Software is
-  furnished to do so, subject to the following conditions:
-
-  The above copyright notice and this permission notice shall be included in
-  all copies or substantial portions of the Software.
-
-  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-  THE SOFTWARE.
+/*!
+ - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+  Copyright (C) 2020 jeffy-g <hirotom1107@gmail.com>
+  Released under the MIT license
+  https://opensource.org/licenses/mit-license.php
  - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 */
 /**
@@ -47,6 +29,10 @@ import {
 interface IFlowableLockWithTimeStamp extends IFlowableLock {
     last?: number;
 }
+type TLockRecordKey = string | number;
+/**
+ * @typedef {string | number} TLockRecordKey
+ */
 
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -63,16 +49,16 @@ export namespace restrictor {
      */
     const internalLock = new MS(1);
     /**
-     * 
+     *
      */
-    let locks: Record<string | number, IFlowableLockWithTimeStamp> = Object.create(null);
+    let locks: Record<TLockRecordKey, IFlowableLockWithTimeStamp> = Object.create(null);
     /**
      * 
-     * @param key 
-     * @param restriction 
+     * @param {TLockRecordKey} key 
+     * @param {number} restriction 
      * @throws when different restriction
      */
-    const get = async (key: string | number, restriction: number) => {
+    const get = async (key: TLockRecordKey, restriction: number) => {
         // acquire internal lock
         await internalLock.acquire(false);
 
@@ -98,10 +84,10 @@ export namespace restrictor {
      * 
      *   + ⚠️ The object to be retrieved with `key` must already be created with `multi` ore `one`
      * 
-     * @param key 
+     * @param {TLockRecordKey} key 
      * @returns `IFlowableLock` instance or `undefined`
      */
-    export const getLockByKey = async (key: string | number) => {
+    export const getLockByKey = async (key: TLockRecordKey) => {
         // acquire internal lock
         await internalLock.acquire(false);
         const l = locks[key];
@@ -113,7 +99,8 @@ export namespace restrictor {
     /**
      * Eliminate unused instances for the `timeSpan` seconds
      * 
-     * @param timeSpan specify unit as seconds
+     * @param {number} timeSpan specify unit as seconds
+     * @param {true} [debug] enable debug
      * @returns {Promise<number>} eliminated count
      * @date 2020/6/19
      */
@@ -128,7 +115,7 @@ export namespace restrictor {
         let eliminatedCount = 0;
         let eliminatedKeys: string[];
 
-        !timeSpan && (timeSpan = 1); // avoid implicit bug
+        !timeSpan && /* istanbul ignore next */(timeSpan = 1); // avoid implicit bug
         timeSpan *= 1000;
         if (debug) {
             eliminatedKeys = [];
@@ -167,11 +154,12 @@ export namespace restrictor {
     /**
      * Allocate a semaphore for each `key`, and limit the number of shares with the value of `restriction`
      * 
-     * @param key number or string as tag
-     * @param restriction number of process restriction
-     * @param pb the process body
+     * @template {any} T
+     * @param {TLockRecordKey} key number or string as tag
+     * @param {number} restriction number of process restriction
+     * @param {() => Promise<T>} pb the process body
      */
-    export async function multi<T>(key: string | number, restriction: number, pb: () => Promise<T>) {
+    export async function multi<T>(key: TLockRecordKey, restriction: number, pb: () => Promise<T>) {
         const s = await get(key, restriction);
         const result = s.flow(pb);
         s.last = Date.now();
@@ -183,10 +171,11 @@ export namespace restrictor {
      *  + use case
      *    * Avoid concurrent requests to the same url
      * 
-     * @param key number or string as tag
-     * @param pb the process body
+     * @template {any} T
+     * @param {TLockRecordKey} key number or string as tag
+     * @param {() => Promise<T>} pb the process body
      */
-    export async function one<T>(key: string | number, pb: () => Promise<T>) {
+    export async function one<T>(key: TLockRecordKey, pb: () => Promise<T>) {
         return multi(key, 1, pb);
     }
 }

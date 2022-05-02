@@ -1,26 +1,8 @@
-/*
-! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-  The MIT License (MIT)
-
-  Copyright (C) 2020 jeffy-g hirotom1107@gmail.com
-
-  Permission is hereby granted, free of charge, to any person obtaining a copy
-  of this software and associated documentation files (the "Software"), to deal
-  in the Software without restriction, including without limitation the rights
-  to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-  copies of the Software, and to permit persons to whom the Software is
-  furnished to do so, subject to the following conditions:
-
-  The above copyright notice and this permission notice shall be included in
-  all copies or substantial portions of the Software.
-
-  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-  THE SOFTWARE.
+/*!
+ - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+  Copyright (C) 2020 jeffy-g <hirotom1107@gmail.com>
+  Released under the MIT license
+  https://opensource.org/licenses/mit-license.php
  - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 */
 /**
@@ -92,14 +74,35 @@ export type TFlowableLock<T = TVoidFunction> = IFlowableLock & {
      * pending
      */
     readonly q: Deque<T>;
-    // readonly q: TVoidFunction[];
 };
 
 export type TVoidFunction = () => void;
 
+/**
+ * @typedef ISimplifiedLock
+ * @prop {(lazy?: boolean) => Promise<void>} acquire acquire the process rights&#64;param lazy Whether the privilege acquisition process is deffer. default `true`
+ * @prop {() => void} release release the pending of one
+ * @prop {(restriction: number) => void} setRestriction Change sharing restrictions to the value of `restriction`&#64;param {number} restriction
+ * @prop {number} pending Get the number of currently pending processes&#64;type {number}
+ * @prop {number} limit limitation
+ * @prop {number} capacity capacity
+ */
+/**
+ * @typedef {<T>(f: () => Promise<T>, lazy?: boolean) => Promise<T>} TFlow
+ * @typedef {ISimplifiedLock & { flow: TFlow }} IFlowableLock
+ * @typedef {() => void} TVoidFunction
+ * @typedef {import("./deque").Deque} Deque
+ * @typedef {IFlowableLock & { readonly q: Deque }} TFlowableLock
+ */
+
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 //                       class or namespace exports.
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+/**
+ * 
+ * @param {TFlowableLock} z 
+ * @param {TVoidFunction} r 
+ */
 const box = (z: TFlowableLock, r: TVoidFunction) => {
     if (z.capacity > 0) {
         z.capacity--, r();
@@ -108,6 +111,12 @@ const box = (z: TFlowableLock, r: TVoidFunction) => {
         z.q.push(r);
     }
 };
+/**
+ * 
+ * @param {TFlowableLock} dis 
+ * @param {boolean} [lazy] default: true
+ * @returns {Promise<void>}
+ */
 export const acquire = (dis: TFlowableLock, lazy = true) => {
     // return !lazy? aqtight(dis): aqlazy(dis);
     return new Promise<void>(r => {
@@ -120,58 +129,19 @@ export const acquire = (dis: TFlowableLock, lazy = true) => {
         }
     });
 };
-// export const acquire = (dis: TFlowableLock, lazy = true) => {
-//     // return !lazy? aqtight(dis): aqlazy(dis);
-//     return new Promise<void>(resolve => {
-//         // DEVNOTE: In the following code, you may not be able to get the effect of
-//         //   switching with the `lazy` flag (when tight processing is required
-//         const box = () => {
-//             if (dis.capacity > 0) {
-//                 dis.capacity--, resolve();
-//             }
-//             else {
-//                 dis.q.push(resolve);
-//             }
-//         };
-//         // DEVNOTE: Deque object resize event is less likely to occur if overdue by timeout
-//         //   - however, this is not the case if the process takes hundreds of ms
-//         if (!lazy) {
-//             box();
-//         } else {
-//             setTimeout(box, 4);
-//         }
-//         // // setTimeout(() => {
-//         // //     if (dis.capacity > 0) {
-//         // //         dis.capacity--, resolve();
-//         // //     }
-//         // //     else {
-//         // //         dis.q.push(resolve);
-//         // //     }
-//         // // }, 4);
-//         // if (dis.capacity > 0) {
-//         //     dis.capacity--, resolve();
-//         // }
-//         // else {
-//         //     dis.q.push(resolve);
-//         // }
-//     });
-// };
+
+/**
+ * @param {TFlowableLock} dis
+ * @returns {void}
+ */
 export const release = (dis: TFlowableLock) => {
     dis.capacity++;
     if (dis.q.length) {
         // DEVNOTE: Will never reach `THROW`
-        dis.capacity -= 1, (dis.q.shift() || THROW)();
+        dis.capacity -= 1, (dis.q.shift() || /* istanbul ignore next */THROW)();
     }
     if (dis.capacity > dis.limit) {
         console.warn("inconsistent release!");
         dis.capacity = dis.limit;
     }
 };
-// export const flow = async <T>(dis: TFlowableLock, process: () => Promise<T>, lazy?: boolean) => {
-//     await acquire(dis, lazy);
-//     try {
-//         return await process();
-//     } finally {
-//         release(dis);
-//     }
-// };
