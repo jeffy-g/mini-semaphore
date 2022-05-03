@@ -60,11 +60,11 @@ webpack() {
 }
 
 build() {
-  npx concurrently -n build:cjs,build:esm,webpack -c blue,yellow,green "tsc" "tsc -p src/tsconfig.json" "yarn fire:tool webpack"
+  npx concurrently -n build:cjs,build:esm,webpack -c blue,yellow,green "tsc" "tsc -p src/tsconfig.json" "bash ${0} webpack"
 }
 
 if [ ! -z $1 ]; then
     [ "$1" = "patch_with_tag" ] && patch_with_tag $2 || $1
 else
-    echo "no parameters..."
+    echo "[${0}]: no parameters..."
 fi
