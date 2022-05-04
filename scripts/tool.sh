@@ -44,6 +44,7 @@ distExtra() {
     "cpx $cpxopt \"./build/**/*.js\" dist"\
     "orgpkg -p -k defs"
 
+  jstool -cmd rmc -rmc4ts -basePath "dist/cjs,dist/esm"
   # js to mjs
   makeMjs
 }
