@@ -1,0 +1,13 @@
+{
+    "compilerOptions": {
+        "newLine": "LF",
+        "skipDefaultLibCheck": true,
+        "skipLibCheck": true,
+        "strict": true,
+        "moduleResolution": "node",
+        "baseUrl": "./"
+    },
+    "include": [
+        "./**/*"
+    ]
+}

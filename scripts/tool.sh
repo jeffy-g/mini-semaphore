@@ -22,12 +22,30 @@
 #  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 #  THE SOFTWARE.
 #
+SCRIPT_DIR=$(cd $(dirname $0); pwd)
 cpxopt=$([ -z $CI ] && echo "-v" || echo "")
+
+jstool() {
+  shift 0
+  node "./scripts/tiny/tools.js" $*
+}
+
+patch_with_tag() {
+  local ret=$(jstool -cmd "version" -extras "./src/index.ts," $1);
+  local after=$(echo $ret | sed -E 's/.*version updated: ([0-9]+\.[0-9]+\.[0-9]+).*/\1/');
+  echo version=[$after];
+  git add -u;
+  git commit -m v$after;
+  git tag v$after
+}
 
 distExtra() {
   npx concurrently -n "copy:lic,copy:js,orgpkg" -c "green,blue,red" "cpx $cpxopt \"./{README.md,LICENSE}\" dist"\
     "cpx $cpxopt \"./build/**/*.js\" dist"\
     "orgpkg -p -k defs, -o dist"
+
+  # js to mjs
+  makeMjs
 }
 
 copytypes() {
@@ -56,11 +74,19 @@ webpack() {
   [ -z $CI ] && npx webpack || npx webpack>/dev/null
   echo
   # Revived `stripWebpack`
-  node ./scripts/tools -cmd stripWebpack
+  jstool -cmd stripWebpack
 }
 
 build() {
   npx concurrently -n build:cjs,build:esm,webpack -c blue,yellow,green "tsc" "tsc -p src/tsconfig.json" "bash ${0} webpack"
+}
+
+makeMjs() {
+  jstool -cmd "cjbm" -basePath "./dist/esm" -ext "mjs"
+  . ${SCRIPT_DIR}/shift-ext.sh
+  shopt -s extglob
+  shift-extension "./dist/esm/*.js" "js" "mjs" "mv"
+  return 0
 }
 
 if [ ! -z $1 ]; then

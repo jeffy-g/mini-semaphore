@@ -5,15 +5,14 @@ const path = require("path");
 const webpack = require("webpack");
 // using "terser-webpack-plugin"
 const TerserPlugin = require("terser-webpack-plugin");
-const utils = require("./scripts/utils");
+const progress = require("./scripts/tiny/progress/");
 
 
 /** 
- * @typedef {import("terser").MinifyOptions} TTerserOptions
  * @typedef {webpack.Configuration} WebpackConfigration
  * @typedef {{ beautify?: true; forceSourceMap?: true }} TExtraOptions
  */
-/** @type {TTerserOptions} */
+/** @type {import("terser").MinifyOptions} */
 const terserOptions = {
     sourceMap: true,
     mangle: true,
@@ -109,7 +108,7 @@ const createWebpackConfig = (target, output, mode = "production", extraOpt = {})
     
         plugins: [
             new webpack.ProgressPlugin(
-                utils.createWebpackProgressPluginHandler(/*`./logs/${utils.dateStringForFile()}-webpack.log`*/)
+                progress.createWebpackProgressPluginHandler(/*`./logs/${utils.dateStringForFile()}-webpack.log`*/)
             ),
         ],
         optimization: {
