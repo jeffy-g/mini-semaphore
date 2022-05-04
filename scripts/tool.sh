@@ -42,7 +42,7 @@ patch_with_tag() {
 distExtra() {
   npx concurrently -n "copy:lic,copy:js,orgpkg" -c "green,blue,red" "cpx $cpxopt \"./{README.md,LICENSE}\" dist"\
     "cpx $cpxopt \"./build/**/*.js\" dist"\
-    "orgpkg -p -k defs, -o dist"
+    "orgpkg -p -k defs"
 
   # js to mjs
   makeMjs
