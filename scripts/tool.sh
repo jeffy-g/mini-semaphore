@@ -55,14 +55,13 @@ copytypes() {
     "$cpx_pre ./dist"
   )
   local names=dts:dist
-  local i=1
   # # output directories (by build target)
   # local dirs="cjs,esm,umd,webpack,webpack-esm"
   # # to array
   # dirs=(${dirs//,/ })
   local -a dirs=(cjs esm umd webpack webpack-esm)
   for dir in "${dirs[@]}"; do
-    commands[((i++))]="$cpx_pre ./dist/${dir}"
+    commands+=("$cpx_pre ./dist/${dir}")
     names+=",dts:dist/${dir}"
   done
 
