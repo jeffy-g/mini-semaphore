@@ -7,6 +7,7 @@
  - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 */
 // @ts-check
+
 /**
  * @typedef {(matchs: string, ...args: any[]) => string} TStringReplacer
  */
@@ -40,10 +41,10 @@ const utils = require("./utils");
  */
 
 /**
- * @type {TToolArgs & ReturnType<typeof utils.getExtraArgs>}
+ * @type {ReturnType<typeof utils.getExtraArgs<TToolArgs>>}
  */
 const params = utils.getExtraArgs();
-!utils.CI && console.log(params);
+utils.log(params);
 
 
 
@@ -51,7 +52,7 @@ const params = utils.getExtraArgs();
  * @typedef TProcessSourcesOpt
  * @prop {string} [base]
  * @prop {string[]} [bases] Array of search directory paths, overriding "base"
- * @prop {RegExp} [test]
+ * @prop {RegExp} [test] default: `/\.js$/`
  * @prop {string[]} [targets]
  * @prop {string} [suffix]
  */
@@ -96,36 +97,58 @@ function processSources(
         }
     }
 
-    console.time(taskName);
+    sourceFiles = sourceFiles.filter(Boolean);
+    let count = sourceFiles.length;
+    /** @param {string} [fileName] */
+    const done = (fileName) => {
+        --count === 0 && console.timeEnd(taskName);
+        fileName && utils.log(`write: ${fileName}`);
+    };
+    /** @param {NodeJS.ErrnoException} err */
+    const handleError = (err) => {
+        console.error(err);
+        done();
+    };
+    count && console.time(taskName);
     for (const sourceFile of sourceFiles) {
-        if (fs.existsSync(sourceFile)) {
-            // (err: any, data: string) => void
-            utils.readTextUTF8(sourceFile, (err, data) => {
-                if (err) {
-                    console.log(err);
-                    return;
-                }
-                const ret = process(data);
-                const outputName = sourceFile.replace(/(?=\.js$)/, suffix);
-                if (/** @type {any} */(ret) instanceof Promise) {
-                    ret.then((/** @type {string} */data) => {
-                        utils.writeTextUTF8(data, outputName);
-                    });
-                } else {
-                    utils.writeTextUTF8(ret, outputName);
-                }
-            });
-        } else {
-            console.warn(`file: "${sourceFile}" is not exists`);
-        }
+        fs.stat(sourceFile, (err, s) => {
+            if (err) {
+                handleError(err);
+            } else if (s.isFile()) {
+                fs.readFile(sourceFile, "utf8", async (err, data) => {
+                    if (err) {
+                        handleError(err);
+                    } else {
+                        /** @type {string} */
+                        const result = await new Promise(resolve => {
+                            const ret = process(data);
+                            if (/** @type {any} */(ret) instanceof Promise) {
+                                ret.then((/** @type {string} */data) => {
+                                    resolve(data);
+                                });
+                            } else {
+                                resolve(ret);
+                            }
+                        });
+                        // TODO: changeable extensions
+                        const outputFileName = sourceFile.replace(/(?=\.js$)/, suffix);
+                        fs.writeFile(
+                            outputFileName, result, () => done(outputFileName)
+                        );
+                    }
+                });
+            } else {
+                done();
+            }
+        });
     }
-    console.timeEnd(taskName);
 }
 
 /**
  * @typedef {{
  *    fn: () => void;
  *    help: string;
+ *    taskName?: string;
  * }} TJSToolEntry
  */
 /**
@@ -138,7 +161,26 @@ function processSources(
  * @prop {string | string[]} basePath - source scan path
  */
 
- 
+
+/**
+ * actually, return value will be like `TVersionString + "-dev"`
+ * 
+ * @type {(v: RegExpExecArray) => TVersionString}
+ */
+const decrementVersion = (version) => {
+    if (+version[2] > 0) {
+        // @ts-ignore 
+        version[2]--;
+    } else if (+version[1] > 0) {
+        // @ts-ignore 
+        version[1]--, version[2] = 99;
+    } else if (+version[0] > 0) {
+        // @ts-ignore 
+        version[0]--, version[1] = version[2] = 99;
+    }
+    return /** @type {TVersionString} */(version.slice(0, 3).join(".") + (version[3] || ""));
+};
+
 /**
  * @type {Record<string, TJSToolEntry>}
  */
@@ -147,12 +189,19 @@ const ToolFunctions = {
     /** (r)ecord(W)ebpack(S)ize */
     // jstool -cmd rws [-webpack lib/webpack.js -dest "./dev-extras/webpack-size.json"]
     rws: {
-        fn: () => {
+        taskName: "(R)ecord(W)ebpack(S)ize",
+        /**
+         * @typedef {`${number}.${number}.${number}`} TVersionString
+         * @typedef {[number, number, number]} TNVersion
+         */
+        fn() {
             const thisPackage = utils.readJson("./package.json");
             const recordPath = params.dest || "./logs/webpack-size.json";
+            /** @type {Record<TVersionString, { webpack?: number; umd?: number}>} */
             const sizeRecord = fs.existsSync(recordPath)? utils.readJson(recordPath): {};
+            /** @type {TVersionString} */
             const versionStr = thisPackage.version;
-    
+
             const entry = {};
             let sourcePath = params.webpack || "./dist/webpack/index.js";
             if (fs.existsSync(sourcePath)) {
@@ -162,22 +211,50 @@ const ToolFunctions = {
             if (fs.existsSync(sourcePath)) {
                 entry.umd = fs.statSync(sourcePath).size;
             }
-    
-            if (Object.keys(entry).length) {
-                sizeRecord[versionStr] = entry;
-                !utils.CI && console.log(sizeRecord);
-                utils.writeTextUTF8(
-                    JSON.stringify(sizeRecord, null, 2), recordPath, () => {
-                        console.log("[%s] is updated", recordPath);
+
+            if (entry.webpack || entry.umd) {
+                const nversion = /** @type {RegExpExecArray} */(/(\d+)\.(\d+)\.(\d+)(-\w+)?/.exec(versionStr));
+                const $0 = nversion.shift();
+                /** @type {typeof sizeRecord["0.0.0"]} */
+                let prevEntry = sizeRecord[
+                    /** @type {TVersionString} */($0)
+                ];
+                if (!prevEntry) do {
+                    const version = decrementVersion(nversion);
+                    prevEntry = sizeRecord[version];
+                    if (prevEntry || version.startsWith("0.0.0")) {
+                        break;
                     }
-                );
+                } while (1);
+
+                if (prevEntry) {
+                    if (
+                        (prevEntry.webpack && entry.webpack) && (prevEntry.webpack ^ entry.webpack) ||
+                        (prevEntry.umd && entry.umd) && (prevEntry.umd ^ entry.umd)
+                    ) {
+                        sizeRecord[versionStr] = entry;
+                        utils.log(sizeRecord);
+                        utils.writeTextUTF8(
+                            JSON.stringify(sizeRecord, null, 2), recordPath, () => {
+                                console.log("[%s] is updated", recordPath);
+                            }
+                        );
+                    } else {
+                        console.log(`${this.taskName}: No change from previours webpack size record.`, prevEntry);
+                    }
+                } else {
+                    console.log(`${this.taskName}: webpack size record were nothing.`);
+                }
             }
         },
-        help: `(r)ecord(W)ebpack(S)ize
-  ex - jstool -cmd rws [-webpack lib/webpack.js -dest "./dev-extras/webpack-size.json"]
+        get help() {
+            return `${this.taskName}
+  ex - jstool -cmd rws [-webpack lib/webpack.js -umd umd/webpack.js -dest "./dev-extras/webpack-size.json"]
   note:
     webpack - if not specified then apply "./dist/webpack/index.js"
-    dest - if not specified then apply "./dev-extras/webpack-size.json"`
+    umd     - if not specified then apply "./dist/umd/index.js"
+    dest    - if not specified then apply "./logs/webpack-size.json"`;
+        }
     },
 
     //
@@ -236,7 +313,7 @@ const ToolFunctions = {
         fn: () => {
             processSources(
                 "[comment trick toggle]", (data) => {
-                    return data.replace(/\/+(?=\*\s?(the-comment-toggle-trick|https:\/\/coderwall))/g, $0 => {
+                    return data.replace(/\/+(?=\*\s?(comment-toggle-trick|https:\/\/coderwall))/g, $0 => {
                         const slashes = $0.length === 2? "/": "//";
                         console.log("the-comment-toggle-trick: %s", /*enableBefore*/slashes.length === 2 ? "-->enable before<--, mute after": "mute before, -->enable after<--");
                         return slashes;
@@ -283,7 +360,7 @@ const ToolFunctions = {
                 nextVersion = `${_major}.${_minor}.${_patch}${tag? tag: ""}`;
                 return `"version": "${nextVersion}"`;
             }, pkgJsons);
-    
+
             const paths = Array.isArray(params.extras)? params.extras: typeof params.extras === "string"? [params.extras]: [];
             if (paths.length) {
                 utils.fireReplace(/v(\d+\.\d+\.\d+)(-\w+)?/g, /** @type {TStringReplacer} */($0, $1, $2) => {
@@ -334,8 +411,9 @@ const ToolFunctions = {
                 "rm-cstyle-cmts", data => {
                     /*
                     const after = rmc(data);
-                    // purge typescript v3.9.x extra statement
-                    return after.replace(/\s(exports\.\w+\s=\s)+void 0;/m, "");
+                    return after.replace(/"use strict";\s/m, "");
+                    // // purge typescript v3.9.x extra statement
+                    // return after.replace(/\s(exports\.\w+\s=\s)+void 0;/m, "");
                     /*/
                     return rmc(data);
                     //*/
@@ -347,7 +425,7 @@ const ToolFunctions = {
                 }
             );
         },
-        help: `jstool -cmd rmc -basePath ./dist [-rmc4ts]
+        help: `jstool -cmd rmc  -basePath "./dist/cjs,./dist/cjs/gulp" -test "/\\.(js|d\\.ts)$/"
   note: basePath - can be "<path>,<path>,..." (array type arg)
         rmc4ts - for typescript source.
           keep comment that start with "/*" when "*/" end mark appears in same line.
@@ -357,13 +435,13 @@ const ToolFunctions = {
     // jstool -cmd stripWebpack -regex \"%npm_package_defs_regex%\""
     stripWebpack: {
         fn: () => {
-            const re = params.regex || /!function\s*\((.)\)([^]+)(?=\(.\.restrictor\s*\|\|)/;
+            const re = params.regex || /!function\s*\((.+?)\)(?:(.+?=.\(\)\})|([^]+)(?=\(.\.restrictor\s*\|\|))/g;
             if (re) {
                 processSources(
                     "[stripWebpack]", data => {
-                        const result = data.replace(re, ($0, $1, $2) => {
+                        const result = data.replace(re, ($0, $1, $2, $3) => {
                             console.log("[stripWebpack] hit!");
-                            return `(${$1}=>${$2})`;
+                            return `((${$1})=>${$2 || $3})`;
                         });
                         return result;
                     }, {

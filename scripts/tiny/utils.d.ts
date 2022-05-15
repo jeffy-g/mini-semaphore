@@ -174,3 +174,4 @@ declare namespace ArgsConfig {
 }
 
 export const CI: boolean;
+export const log: typeof console.log;
