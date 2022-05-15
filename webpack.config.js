@@ -1,17 +1,11 @@
 // @ts-check
 // webpack config for ts file.
-
-const path = require("path");
 const webpack = require("webpack");
 // using "terser-webpack-plugin"
 const TerserPlugin = require("terser-webpack-plugin");
 const progress = require("./scripts/tiny/progress/");
 
 
-/** 
- * @typedef {webpack.Configuration} WebpackConfigration
- * @typedef {{ beautify?: true; forceSourceMap?: true }} TExtraOptions
- */
 /** @type {import("terser").MinifyOptions} */
 const terserOptions = {
     sourceMap: true,
@@ -25,11 +19,21 @@ const terserOptions = {
         quote_style: 3
     }
 };
+/** @type {ConstructorParameters<typeof TerserPlugin>[0]} */
+const terserOpt = {
+    // Enable parallelization. Default number of concurrent runs: os.cpus().length - 1.
+    parallel: true,
+    terserOptions
+};
 /** @type {import("typescript").CompilerOptions} */
 const tsCompilerOptions = {
     removeComments: true
 };
 
+/** 
+ * @typedef {webpack.Configuration} WebpackConfigration
+ * @typedef {{ beautify?: true; forceSourceMap?: true }} TExtraOptions
+ */
 /**
  * @param {WebpackConfigration["target"]} target 
  * @param {WebpackConfigration["output"]} output
@@ -41,12 +45,6 @@ const tsCompilerOptions = {
  */
 const createWebpackConfig = (target, output, mode = "production", extraOpt = {}) =>  {
 
-    /** @type {ConstructorParameters<typeof TerserPlugin>[0]} */
-    const terserOpt = {
-        // Enable parallelization. Default number of concurrent runs: os.cpus().length - 1.
-        parallel: true,
-        terserOptions
-    };
     const {
         beautify,
         forceSourceMap,
@@ -63,7 +61,7 @@ const createWebpackConfig = (target, output, mode = "production", extraOpt = {})
                 loader: "ts-loader",
                 exclude: /node_modules/,
                 options: {
-                    configFile: path.resolve(__dirname, "./tsconfig.json"), // DEVNOTE: 2022/03/24 - OK, works with tsconfig.json
+                    configFile: `${__dirname}/tsconfig.json`,
                     compilerOptions: tsCompilerOptions,
                     // DEVNOTE: cannot use `transpileOnly` option because some problem of typescript enum
                     // transpileOnly: true
@@ -83,9 +81,10 @@ const createWebpackConfig = (target, output, mode = "production", extraOpt = {})
      */
     const externals = [];
     const outputModule = /** @type {webpack.LibraryOptions} */(output.library).type === "module";
+    const mainName = `${target}@${/** @type {webpack.LibraryOptions} */(output.library).type}`;
 
     return {
-        name: `${target}-${mode}`,
+        name: `${mainName}-${mode}`,
         // "production", "development", "none"
         mode,
         // "web", "node"
@@ -118,68 +117,67 @@ const createWebpackConfig = (target, output, mode = "production", extraOpt = {})
         },
         profile: true,
         cache: true,
-        recordsPath: path.join(__dirname, `./logs/webpack-module-ids_${target}.json`),
+        recordsPath: `${__dirname}/logs/webpack-module-ids_${mainName}.json`
     };
 };
 
-const debug = false;
-/**
- * @type {true | undefined}
- */
-const useSourceMap = void 0;
 
-module.exports = [
-    createWebpackConfig(
-        /* target */ "web",
-        /* output */ {
-            path: `${__dirname}/dist/umd/`,
-            filename: "[name].js",
+/**
+ * @typedef {Parameters<typeof createWebpackConfig>} TConfigParameters
+ * @typedef {[TConfigParameters[0], TConfigParameters[1]]} TPrimaryParameters
+ */
+/**
+ * @type {(TPrimaryParameters)[]}
+ */
+ const configParameters = [
+    [
+        "web", /* target, can be omitted as default is 'web' */ 
+        {      /* output */
+            path: "dist/umd/",
             library: {
-              name: "MiniSema",
-              type: "umd"
+                name: "MiniSema",
+                type: "umd"
             },
-            // DEVNOTE: 2020/10/13
-            //  From webpack v5, if "globalObject" is omitted, it seems that `self` is output, so I decided to explicitly specify "globalThis".
-            //  This is a workaround for the problem that test stops at error
+            // chunkFormat: "array-push",
             globalObject: "globalThis"
-        },
-        debug && "development" || void 0,
-        {
-            beautify: debug || void 0,
-            forceSourceMap: useSourceMap
         }
-    ),
-    createWebpackConfig(
-        /* target */ "node",
-        /* output */ {
-            path: `${__dirname}/dist/webpack/`,
-            filename: "[name].js",
+    ], [
+        "node", /* target */
+        {       /* output */
+            path: "dist/webpack/",
             library: {
                 type: "commonjs2"
             },
-            // chunkFormat: "commonjs"
-        },
-        debug && "development" || void 0,
-        {
-            beautify: debug || void 0,
-            forceSourceMap: useSourceMap
+            chunkFormat: "commonjs"
         }
-    ),
-    createWebpackConfig(
+    ], [
         // DEVNOTE: 2022/02/10 es2020 is output chunks
-        /* target */ "es2019",
-        /* output */ {
-            path: `${__dirname}/dist/webpack-esm/`,
-            filename: "[name].mjs",
+        "es2019", /* target */
+        {       /* output */
+            path: "dist/webpack-esm",
             library: {
                 type: "module"
             },
             chunkFormat: "module"
-        },
-        debug && "development" || void 0,
-        {
-            beautify: debug || void 0,
-            forceSourceMap: useSourceMap
         }
-    ),
+    ]
 ];
+
+const debug = false;
+/** @type {WebpackConfigration["mode"]} */
+const mode = debug && "development" || void 0;
+/** @type {TExtraOptions} */
+const extraOpt = {
+    beautify: debug || void 0,
+    // forceSourceMap: true
+};
+module.exports = configParameters.map(config => {
+    const [
+        target, output
+    ] = config;
+    if (!output.filename) {
+        output.filename = "[name].js";
+    }
+    output.path = `${__dirname}/${output.path}`;
+    return createWebpackConfig(target, output, mode, extraOpt);
+});

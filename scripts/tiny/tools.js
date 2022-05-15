@@ -435,6 +435,7 @@ const ToolFunctions = {
     // jstool -cmd stripWebpack -regex \"%npm_package_defs_regex%\""
     stripWebpack: {
         fn: () => {
+            // https://regex101.com/r/CmraG0/1
             const re = params.regex || /!function\s*\((.+?)\)(?:(.+?=.\(\)\})|([^]+)(?=\(.\.restrictor\s*\|\|))/g;
             if (re) {
                 processSources(
