@@ -189,11 +189,10 @@ const ToolFunctions = {
     /** (r)ecord(W)ebpack(S)ize */
     // jstool -cmd rws [-webpack lib/webpack.js -dest "./dev-extras/webpack-size.json"]
     rws: {
-        taskName: "(R)ecord(W)ebpack(S)ize",
         /**
          * @typedef {`${number}.${number}.${number}`} TVersionString
-         * @typedef {[number, number, number]} TNVersion
          */
+        taskName: "(R)ecord(W)ebpack(S)ize",
         fn() {
             const thisPackage = utils.readJson("./package.json");
             const recordPath = params.dest || "./logs/webpack-size.json";
@@ -202,6 +201,17 @@ const ToolFunctions = {
             /** @type {TVersionString} */
             const versionStr = thisPackage.version;
 
+            /**
+             * @typedef {typeof sizeRecord["0.0.0"]} TSizeRecordEntry
+             */
+            /**
+             * @param {TSizeRecordEntry} a 
+             * @param {TSizeRecordEntry} b 
+             * @returns 
+             */
+            const isDiff = (a, b) => {
+                return  (a.webpack && b.webpack) && (a.webpack ^ b.webpack) || (a.umd && b.umd) && (a.umd ^ b.umd);
+            };
             const entry = {};
             let sourcePath = params.webpack || "./dist/webpack/index.js";
             if (fs.existsSync(sourcePath)) {
@@ -215,7 +225,7 @@ const ToolFunctions = {
             if (entry.webpack || entry.umd) {
                 const nversion = /** @type {RegExpExecArray} */(/(\d+)\.(\d+)\.(\d+)(-\w+)?/.exec(versionStr));
                 const $0 = nversion.shift();
-                /** @type {typeof sizeRecord["0.0.0"]} */
+                /** @type {TSizeRecordEntry} */
                 let prevEntry = sizeRecord[
                     /** @type {TVersionString} */($0)
                 ];
@@ -228,10 +238,7 @@ const ToolFunctions = {
                 } while (1);
 
                 if (prevEntry) {
-                    if (
-                        (prevEntry.webpack && entry.webpack) && (prevEntry.webpack ^ entry.webpack) ||
-                        (prevEntry.umd && entry.umd) && (prevEntry.umd ^ entry.umd)
-                    ) {
+                    if (isDiff(prevEntry, entry)) {
                         sizeRecord[versionStr] = entry;
                         utils.log(sizeRecord);
                         utils.writeTextUTF8(
