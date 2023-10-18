@@ -90,7 +90,9 @@ makeMjs() {
 }
 
 if [ ! -z $1 ]; then
-    [ "$1" = "patch_with_tag" ] && patch_with_tag $2 || $1
+    [ "$1" = "patch_with_tag" ] && patch_with_tag $2 || {
+      $1 $*
+    }
 else
     echo "[${0}]: no parameters..."
 fi
