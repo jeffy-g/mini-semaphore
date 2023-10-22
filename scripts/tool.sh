@@ -26,7 +26,7 @@ SCRIPT_DIR=$(cd $(dirname $0); pwd)
 cpxopt=$([ -z $CI ] && echo "-v" || echo "")
 
 jstool() {
-  shift 0
+  shift 1
   node "./scripts/tiny/tools.js" $*
 }
 

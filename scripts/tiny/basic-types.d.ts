@@ -28,6 +28,12 @@ type TBC<T> = T | null;
  */
 type Conditional<T, A, B> = unknown extends T ? A : T extends (void | false | undefined) ? A : B;
 
+
+/**
+ * mark a specific property as `required`
+ */
+type RequireThese<T, K extends keyof T> = T & Required<Pick<T, K>>;
+
 /**
  * Remove readonly
  */

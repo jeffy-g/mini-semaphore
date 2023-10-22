@@ -1,3 +1,5 @@
+/// <reference path="./scripts/tiny/basic-types.d.ts"/>
+
 // @ts-check
 // webpack config for ts file.
 const webpack = require("webpack");
@@ -5,14 +7,17 @@ const webpack = require("webpack");
 const TerserPlugin = require("terser-webpack-plugin");
 const progress = require("./scripts/tiny/progress/");
 
+/**
+ * @typedef {import("terser").MinifyOptions} MinifyOptions
+ */
 
-/** @type {import("terser").MinifyOptions} */
+/** @type {RequireThese<MinifyOptions, "format">} */
 const terserOptions = {
     sourceMap: true,
     mangle: true,
     format: {
         comments: false,
-        beautify: true,
+        // beautify: true,
         indent_level: 1,
         // ecma: 9,
         max_line_len: 800,
@@ -20,6 +25,7 @@ const terserOptions = {
     }
 };
 /** @type {ConstructorParameters<typeof TerserPlugin>[0]} */
+// @ts-ignore TS2322: minify option required
 const terserOpt = {
     // Enable parallelization. Default number of concurrent runs: os.cpus().length - 1.
     parallel: true,
@@ -32,12 +38,15 @@ const tsCompilerOptions = {
 
 /** 
  * @typedef {webpack.Configuration} WebpackConfigration
- * @typedef {{ beautify?: true; forceSourceMap?: true }} TExtraOptions
+ * @typedef {Required<WebpackConfigration>} FixWebpackConfigration
+ * @typedef {{
+ *   forceSourceMap?: true;
+ * }} TExtraOptions
  */
 /**
- * @param {WebpackConfigration["target"]} target 
- * @param {WebpackConfigration["output"]} output
- * @param {WebpackConfigration["mode"]} [mode] 
+ * @param {FixWebpackConfigration["target"]} target 
+ * @param {FixWebpackConfigration["output"]} output
+ * @param {FixWebpackConfigration["mode"]} [mode] 
  * @param {TExtraOptions} [extraOpt] see {@link TExtraOptions}
  * @return {WebpackConfigration}
  * @version 2.0
@@ -46,10 +55,11 @@ const tsCompilerOptions = {
 const createWebpackConfig = (target, output, mode = "production", extraOpt = {}) =>  {
 
     const {
-        beautify,
+        // beautify,
         forceSourceMap,
     } = extraOpt;
-    terserOptions.format.beautify = beautify;
+    // DEVNOTE: `beautify` is deperecated, Not implemented anymore
+    // terserOptions.format.beautify = beautify;
 
     /**
      * @type {WebpackConfigration["module"]}
@@ -168,7 +178,7 @@ const debug = false;
 const mode = debug && "development" || void 0;
 /** @type {TExtraOptions} */
 const extraOpt = {
-    beautify: debug || void 0,
+    // beautify: debug || void 0,
     // forceSourceMap: true
 };
 module.exports = configParameters.map(config => {
