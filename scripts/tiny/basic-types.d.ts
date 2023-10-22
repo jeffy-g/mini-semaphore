@@ -26,7 +26,7 @@ type TBC<T> = T | null;
  * 
  * @date 20/03/31
  */
-type Conditional<T, A, B> = unknown extends T ? A : T extends (void | false | undefined) ? A : B;
+type Conditional<T, A, B> = void extends T ? A : T extends (void | false | undefined) ? A : B;
 
 
 /**
