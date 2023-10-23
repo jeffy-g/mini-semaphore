@@ -2,9 +2,6 @@
 ![GitHub](https://img.shields.io/github/license/jeffy-g/mini-semaphore?style=plastic)
 [![npm version](https://badge.fury.io/js/mini-semaphore.svg)](https://badge.fury.io/js/mini-semaphore)
 ![node](https://img.shields.io/node/v/mini-semaphore.svg?style=plastic)
-[![Total alerts](https://img.shields.io/lgtm/alerts/g/jeffy-g/mini-semaphore.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/jeffy-g/mini-semaphore/alerts/)
-[![Language grade: JavaScript](https://img.shields.io/lgtm/grade/javascript/g/jeffy-g/mini-semaphore.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/jeffy-g/mini-semaphore/context:javascript)
-
 ![GitHub code size in bytes](https://img.shields.io/github/languages/code-size/jeffy-g/mini-semaphore.svg?style=plastic)
 ![npm bundle size](https://img.shields.io/bundlephobia/min/mini-semaphore?style=plastic)
 ![npm](https://img.shields.io/npm/dm/mini-semaphore.svg?style=plastic)

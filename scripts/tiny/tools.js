@@ -276,7 +276,7 @@ const ToolFunctions = {
     // basePath <js source base directory>
     // jstool -cmd cjbm -basePath extra-tests/mini-semaphore [-targets "['core.js', 'object.js']"]
     // 
-     cjbm: {
+    cjbm: {
         taskName: "(C)onvert (J)S to (B)rowser (M)odule",
         fn() {
             /** ### regex summary
@@ -347,6 +347,33 @@ const ToolFunctions = {
   note:
     targets - must be array type arg, "['<path>', '<path>',...]" or "<path>,<path>,..."`
         }
+    },
+
+    // jstool -cmd stripWebpack -regex \"%npm_package_defs_regex%\""
+    stripWebpack: {
+        taskName: "stripWebpack",
+        fn() {
+            // https://regex101.com/r/CmraG0/1 // umd only
+            const re = params.regex || /!function\s*\((.+?)\)(?:(.+?=.\(\)\})|([^]+)(?=\(.\.restrictor\s*\|\|))/g;
+            if (re) {
+                processSources(
+                    /** @type {string} */(this.taskName), data => {
+                        const result = data.replace(re, ($0, $1, $2, $3) => {
+                            console.log("[stripWebpack] hit!");
+                            return `((${$1})=>${$2 || $3})`;
+                        });
+                        return result;
+                    }, {
+                        base: "",
+                        // DEVNOTE: 2023/10/23 - match `umd` only...
+                        targets: ["./dist/umd/index.js"/* , "./dist/webpack/index.js", "./dist/webpack-esm/index.mjs" */]
+                    }
+                );
+            }
+        },
+        help: `jstool -cmd stripWebpack [-regex "%npm_package_defs_regex%"]
+  note: regex - unused
+`
     },
 
     // jstool -cmd version -extras "test/web/index.html,"
@@ -452,33 +479,6 @@ const ToolFunctions = {
           keep comment that start with "/*" when "*/" end mark appears in same line.
           if start with "/*-" remove it`
     },
-
-    // jstool -cmd stripWebpack -regex \"%npm_package_defs_regex%\""
-    stripWebpack: {
-        taskName: "stripWebpack",
-        fn() {
-            // https://regex101.com/r/CmraG0/1
-            const re = params.regex || /!function\s*\((.+?)\)(?:(.+?=.\(\)\})|([^]+)(?=\(.\.restrictor\s*\|\|))/g;
-            if (re) {
-                processSources(
-                    /** @type {string} */(this.taskName), data => {
-                        const result = data.replace(re, ($0, $1, $2, $3) => {
-                            console.log("[stripWebpack] hit!");
-                            return `((${$1})=>${$2 || $3})`;
-                        });
-                        return result;
-                    }, {
-                        base: "",
-                        // DEVNOTE: 2023/10/23 - match `umd` only...
-                        targets: ["./dist/umd/index.js"/* , "./dist/webpack/index.js", "./dist/webpack-esm/index.mjs" */]
-                    }
-                );
-            }
-        },
-        help: `jstool -cmd stripWebpack [-regex "%npm_package_defs_regex%"]
-  note: regex - unused
-`
-    }
 };
 
 /**
