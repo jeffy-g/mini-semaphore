@@ -1,30 +1,56 @@
-version: 2
+
+version: 2.1
+
+orbs:
+  codecov: codecov/codecov@3.3.0
+  # The Node.js orb contains a set of prepackaged CircleCI configuration you can utilize
+  # Orbs reduce the amount of configuration required for common tasks.
+  # See the orb documentation here: https://circleci.com/developer/orbs/orb/circleci/node
+  node: circleci/node@5.1.0
 jobs:
-  build:
+  # Below is the definition of your job to build and test your app, you can rename and customize it as you want.
+  build-and-test:
+    # These next lines define a Docker executor: https://circleci.com/docs/2.0/executor-types/
+    # You can specify an image from Dockerhub or use one of our Convenience Images from CircleCI's Developer Hub.
+    # A list of available CircleCI Docker Convenience Images are available here: https://circleci.com/developer/images/image/cimg/node
     docker:
-    - image: node:latest
+      - image: cimg/node:21.0
     working_directory: ~/repo
     steps:
-    - checkout
-    - restore_cache:
-        keys:
-        - node-deps-v1-{{ .Branch }}-{{ checksum "package.json" }}
-        - node-deps-v1-{{ .Branch }}
-        - node-deps-v1
-    - run:
-        name: install, build, test
-        command: |
-          node -v
-          npm -v
-          yarn install
-          yarn all
-          yarn test
-    - save_cache:
-        key: node-deps-v1-{{ .Branch }}-{{ checksum "package.json" }}
-        paths:
-        - ~/repo/node_modules
+      - checkout
+      - restore_cache:
+          keys:
+            - v1-deps-{{ checksum "yarn.lock" }}
+            - v1-deps-
+      - run:
+          name: yarn install
+          command: |
+            yarn install
+      - save_cache:
+          key: v1-deps-{{ checksum "yarn.lock" }}
+          paths:
+            - node_modules
+      - run:
+          name: lint, build, test
+          command: |
+            echo "- - - - - - - - - - - - - - - - - - - - - - - - - - - -"
+            echo '               lint -> build -> test'
+            echo "- - - - - - - - - - - - - - - - - - - - - - - - - - - -"
+            echo "node: $(node -v)"
+            echo "npm : $(npm -v)"
+            echo "- - - - - - - - - - - - - - - - - - - - - - - - - - - -"
+            echo '                  run lint, build'
+            echo "- - - - - - - - - - - - - - - - - - - - - - - - - - - -"
+            npm run all
+            echo "- - - - - - - - - - - - - - - - - - - - - - - - - - - -"
+            echo '                     run test'
+            echo "- - - - - - - - - - - - - - - - - - - - - - - - - - - -"
+            npm run test
+    
+      - codecov/upload:
+          file: "./coverage/coverage-final.json"
+
 workflows:
-  version: 2
-  build:
-    jobs:
-    - build
+    build-and-test:
+      jobs:
+        - build-and-test
