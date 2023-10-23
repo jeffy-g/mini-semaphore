@@ -1,4 +1,5 @@
 [![CircleCI](https://circleci.com/gh/jeffy-g/mini-semaphore/tree/master.svg?style=svg)](https://circleci.com/gh/jeffy-g/mini-semaphore/tree/master)
+[![codecov](https://codecov.io/gh/jeffy-g/mini-semaphore/graph/badge.svg?token=SEEIAGR8HW)](https://codecov.io/gh/jeffy-g/mini-semaphore)
 ![GitHub](https://img.shields.io/github/license/jeffy-g/mini-semaphore?style=plastic)
 [![npm version](https://badge.fury.io/js/mini-semaphore.svg)](https://badge.fury.io/js/mini-semaphore)
 ![node](https://img.shields.io/node/v/mini-semaphore.svg?style=plastic)
