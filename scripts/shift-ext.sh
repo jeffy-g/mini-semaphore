@@ -17,20 +17,21 @@ _EOT_
 
   local debug=
 
-  local pattern="$1"
-  local re_origin_ext="\.${2}$"
+  local re_origin_ext="\.${1}$"
   # NEED a double quote to expand vars
-  local re_oring2after="s/(.*)$re_origin_ext/\1\.$3/"
+  local re_oring2after="s/(.*)$re_origin_ext/\1\.$2/"
 
-  local transformer=$4
+  local transformer=$3
 
   [ ! -z $debug ] && echo re_origin_ext=$re_origin_ext   # OK
-  [ ! -z $debug ] && echo re_oring2after=$re_oring2after #OK
+  [ ! -z $debug ] && echo re_oring2after=$re_oring2after # OK
 
+  shift 3
   if [ ! -z "$transformer" ]; then
     # or below
     # if [[ ! -z $transformer ]]; then
-    for f in $pattern; do
+    echo "[shift-extension] terget files: $*"
+    for f in $*; do
       if [[ $f =~ $re_origin_ext ]]; then
         local after=$(echo $f | sed -E $re_oring2after)
         local command="$transformer $f $after"
@@ -39,7 +40,7 @@ _EOT_
       # [[ $f =~ $re_origin_ext ]] && echo $(echo $f | sed -E $re_oring2after)
     done
   else
-    for f in $pattern; do
+    for f in $*; do
       if [[ $f =~ $re_origin_ext ]]; then
         local after=$(echo $f | sed -E $re_oring2after)
         echo "$f $after"
@@ -47,3 +48,10 @@ _EOT_
     done
   fi
 }
+
+#
+# test: 2023-10-23 - OK
+#
+# $ bash scripts/shift-ext.sh "js" "mjs" "mv" ./dist/{esm,webpack-esm}/*.js
+# echo "run shift-extension $*"
+# shift-extension $*

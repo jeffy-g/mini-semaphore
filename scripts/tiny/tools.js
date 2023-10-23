@@ -30,7 +30,7 @@ const utils = require("./utils");
  * @prop {string} ext for `cjbm` replace extension. default is `js`
  * @prop {RegExp} test
  * @prop {RegExp} regex
- * @prop {boolean} rmc4ts
+ * @prop {true=} rmc4ts
  * 
  * @prop {string} webpack - actual webpack source path
  * @prop {string} umd - actual umd source path
@@ -38,6 +38,8 @@ const utils = require("./utils");
  * @prop {string[]} pkgJsons - version command
  * 
  * @prop {string} help want help? form - "-help <cmd name>"
+ * 
+ * @prop {true} verb want verbose output?
  */
 
 /**
@@ -46,7 +48,7 @@ const utils = require("./utils");
 const params = utils.getExtraArgs();
 utils.log(params);
 
-
+const verbose = params.verb;
 
 /**
  * @typedef TProcessSourcesOpt
@@ -99,10 +101,15 @@ function processSources(
 
     sourceFiles = sourceFiles.filter(Boolean);
     let count = sourceFiles.length;
+    const total = count;
     /** @param {string} [fileName] */
     const done = (fileName) => {
-        --count === 0 && console.timeEnd(taskName);
-        fileName && utils.log(`write: ${fileName}`);
+        --count === 0 && (
+            console.timeEnd(taskName), utils.log(`[${taskName}] file written: ${total}`)
+        );
+        if (verbose && fileName) {
+            utils.log(`[${taskName}] write: ${fileName}`);
+        }
     };
     /** @param {NodeJS.ErrnoException} err */
     const handleError = (err) => {
@@ -270,7 +277,8 @@ const ToolFunctions = {
     // jstool -cmd cjbm -basePath extra-tests/mini-semaphore [-targets "['core.js', 'object.js']"]
     // 
      cjbm: {
-        fn: () => {
+        taskName: "(C)onvert (J)S to (B)rowser (M)odule",
+        fn() {
             /** ### regex summary
              * ```perl
              * (?:import|export)    # comments
@@ -300,7 +308,7 @@ const ToolFunctions = {
             };
             // const bs = Array.isArray(params.basePath)? params.basePath[0]: params.basePath;
             processSources(
-                "[(C)onvert (J)S to (B)rowser (M)odule]", (data) => {
+                /** @type {string} */(this.taskName), (data) => {
                     return data.replace(reImportExportDetection, replacer);
                 }, {
                     bases
@@ -308,18 +316,21 @@ const ToolFunctions = {
                 }
             );
         },
-        help: `(C)onvert (J)S to (B)rowser (M)odule
+        get help() {
+            return `${this.taskName}
   ex - jstool -cmd cjbm -basePath "./dist/esm,extra-tests/mini-semaphore" [-targets "['core.js', 'object.js']"]
   note:
     basePath - can be "<path>,<path>,..." (array type arg)
     targets - must be array type arg, "['<path>', '<path>',...]" or "<path>,<path>,..."`
+        } 
     },
 
     // jstool -cmd cmtTrick -targets "['core.js', 'object.js']" [-basePath extra-tests/mini-semaphore]
     cmtTrick: {
-        fn: () => {
+        taskName: "comment trick toggle",
+        fn() {
             processSources(
-                "[comment trick toggle]", (data) => {
+                /** @type {string} */(this.taskName), (data) => {
                     return data.replace(/\/+(?=\*\s?(comment-toggle-trick|https:\/\/coderwall))/g, $0 => {
                         const slashes = $0.length === 2? "/": "//";
                         console.log("the-comment-toggle-trick: %s", /*enableBefore*/slashes.length === 2 ? "-->enable before<--, mute after": "mute before, -->enable after<--");
@@ -331,9 +342,11 @@ const ToolFunctions = {
                 }
             );
         },
-        help: `jstool -cmd cmtTrick -targets "['core.js', 'object.js']" -basePath extra-tests/mini-semaphore
+        get help() {
+            return `jstool -cmd cmtTrick -targets "['core.js', 'object.js']" -basePath extra-tests/mini-semaphore
   note:
     targets - must be array type arg, "['<path>', '<path>',...]" or "<path>,<path>,..."`
+        }
     },
 
     // jstool -cmd version -extras "test/web/index.html,"
@@ -393,7 +406,8 @@ const ToolFunctions = {
      *   + if start with "/&#42;-" remove it
      */
     rmc: {
-        fn: () => {
+        taskName: "rm-cstyle-cmts",
+        fn() {
 
             const rmc = require("./rm-cmts-lkg");
             // DEVNOTE: 2020/5/2 - rm-cstyle-cmts dev (with scan event listener)
@@ -415,7 +429,7 @@ const ToolFunctions = {
             const targets = params.targets;
             const basePaths = Array.isArray(params.basePath)? params.basePath: [params.basePath];
             processSources(
-                "rm-cstyle-cmts", data => {
+                /** @type {string} */(this.taskName), data => {
                     /*
                     const after = rmc(data);
                     return after.replace(/"use strict";\s/m, "");
@@ -432,7 +446,7 @@ const ToolFunctions = {
                 }
             );
         },
-        help: `jstool -cmd rmc  -basePath "./dist/cjs,./dist/cjs/gulp" -test "/\\.(js|d\\.ts)$/"
+        help: `$jstool -cmd rmc  -basePath "./dist/cjs,./dist/cjs/gulp" -test "/\\.(js|d\\.ts)$/"
   note: basePath - can be "<path>,<path>,..." (array type arg)
         rmc4ts - for typescript source.
           keep comment that start with "/*" when "*/" end mark appears in same line.
@@ -441,12 +455,13 @@ const ToolFunctions = {
 
     // jstool -cmd stripWebpack -regex \"%npm_package_defs_regex%\""
     stripWebpack: {
-        fn: () => {
+        taskName: "stripWebpack",
+        fn() {
             // https://regex101.com/r/CmraG0/1
             const re = params.regex || /!function\s*\((.+?)\)(?:(.+?=.\(\)\})|([^]+)(?=\(.\.restrictor\s*\|\|))/g;
             if (re) {
                 processSources(
-                    "[stripWebpack]", data => {
+                    /** @type {string} */(this.taskName), data => {
                         const result = data.replace(re, ($0, $1, $2, $3) => {
                             console.log("[stripWebpack] hit!");
                             return `((${$1})=>${$2 || $3})`;
@@ -454,7 +469,8 @@ const ToolFunctions = {
                         return result;
                     }, {
                         base: "",
-                        targets: ["./dist/umd/index.js", "./dist/webpack/index.js", "./dist/webpack-esm/index.mjs"]
+                        // DEVNOTE: 2023/10/23 - match `umd` only...
+                        targets: ["./dist/umd/index.js"/* , "./dist/webpack/index.js", "./dist/webpack-esm/index.mjs" */]
                     }
                 );
             }

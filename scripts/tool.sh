@@ -26,7 +26,7 @@ SCRIPT_DIR=$(cd $(dirname $0); pwd)
 cpxopt=$([ -z $CI ] && echo "-v" || echo "")
 
 jstool() {
-  shift 1
+  # shift 1 # `shift` is needless
   node "./scripts/tiny/tools.js" $*
 }
 
@@ -39,14 +39,20 @@ patch_with_tag() {
   git tag v$after
 }
 
+build() {
+  npx concurrently -n build:cjs,build:esm,build:webpack -c blue,yellow,green "tsc" "tsc -p src/tsconfig.json" "bash ${0} webpack"
+}
+
 distExtra() {
-  npx concurrently -n "copy:lic,copy:js,orgpkg" -c "green,blue,red" "cpx $cpxopt \"./{README.md,LICENSE}\" dist"\
+  npx concurrently -n "dist:copy:lic,dist:copy:js,dist:orgpkg" -c "green,blue,red" "cpx $cpxopt \"./{README.md,LICENSE}\" dist"\
     "cpx $cpxopt \"./build/**/*.js\" dist"\
     "orgpkg -p -k defs"
 
   jstool -cmd rmc -rmc4ts -basePath "dist/cjs,dist/esm"
   # js to mjs
   makeMjs
+  # Revived `stripWebpack`
+  jstool -cmd stripWebpack
 }
 
 copytypes() {
@@ -72,27 +78,20 @@ copytypes() {
 webpack() {
   # npx rimraf "./dist/webpack/*" "./dist/umd/*" "./dist/webpack-esm/*"
   [ -z $CI ] && npx webpack || npx webpack>/dev/null
-  echo
-  # Revived `stripWebpack`
-  jstool -cmd stripWebpack
-}
-
-build() {
-  npx concurrently -n build:cjs,build:esm,webpack -c blue,yellow,green "tsc" "tsc -p src/tsconfig.json" "bash ${0} webpack"
 }
 
 makeMjs() {
   jstool -cmd "cjbm" -basePath "./dist/esm" -ext "mjs"
   . ${SCRIPT_DIR}/shift-ext.sh
-  shopt -s extglob
-  shift-extension "./dist/esm/*.js" "js" "mjs" "mv"
+  # shopt -s extglob
+  shift-extension "js" "mjs" "mv" ./dist/{esm,webpack-esm}/*.js
   return 0
 }
 
 if [ ! -z $1 ]; then
-    [ "$1" = "patch_with_tag" ] && patch_with_tag $2 || {
-      $1 $*
-    }
+  fname=$1
+  shift
+  $fname $*
 else
-    echo "[${0}]: no parameters..."
+  echo "[${0}]: no parameters..."
 fi
