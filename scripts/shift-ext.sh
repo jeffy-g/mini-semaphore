@@ -1,5 +1,8 @@
-#!/bin/bash
-
+#!/bin/bash -x
+# 
+# version 1.0 - 2022/03/19
+# version 2.0 - 2023/10/23
+# 
 shift-extension() {
 
   if [ "$1" = "" ]; then
