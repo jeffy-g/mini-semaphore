@@ -32,14 +32,16 @@ const utils = require("./utils");
  * @prop {RegExp} regex
  * @prop {true=} rmc4ts
  * 
- * @prop {string} webpack - actual webpack source path
- * @prop {string} umd - actual umd source path
+ * @prop {string} webpack - webpacked source path. default `./dist/webpack/index.js`
+ * @prop {string} umd - webpacked umd source path. default `./dist/umd/index.js`
+ * @prop {string} bin - webpacked bin source path. default `./dist/bin/index.js`
+ * @prop {TRwsTags[]} rws-tags
  * 
  * @prop {string[]} pkgJsons - version command
- * 
  * @prop {string} help want help? form - "-help <cmd name>"
- * 
  * @prop {true} verb want verbose output?
+ * 
+ * @typedef {"webpack" | "umd" | "bin"} TRwsTags
  */
 
 /**
@@ -58,6 +60,7 @@ const verbose = params.verb;
  * @prop {string[]} [targets]
  * @prop {string} [suffix]
  */
+const isArray = Array.isArray;
 /**
  * 
  * @param {string} taskName 
@@ -77,8 +80,11 @@ function processSources(
     /** @type {string[]} */
     let sourceFiles;
     if (!targets && (bases || base)) {
+        const actualBases = isArray(bases) ? bases: [base];
         sourceFiles = [];
         const re = params.test || test;
+        // DEVNOTE: 2022/05/28 - bash bug?, cannot evaluate regex string at "tool.sh"
+        // console.log("processSources::re", re, re.constructor);
         const visitDirectry = (/** @type {string} */ dir) => {
             utils.walkDirSync(dir, dirent => {
                 if (dirent.isFile() && re.test(dirent.name)) {
@@ -86,15 +92,14 @@ function processSources(
                 }
             });
         };
-        if (Array.isArray(bases)) {
-            bases.forEach(base => visitDirectry(base));
-        } else {
-            visitDirectry(base);
-        }
+        // DEVNOTE: remove extra whitespaces
+        actualBases.map(s => s && s.trim()).forEach(base => visitDirectry(base));
     } else {
         sourceFiles = params.targets || targets;
         if (sourceFiles.length && params.basePath) {
-            const basePath = Array.isArray(params.basePath)? params.basePath[0]: params.basePath;
+            // DEVNOTE: remove extra whitespaces
+            sourceFiles = sourceFiles.map(s => s && s.trim());
+            const basePath = isArray(params.basePath)? params.basePath[0]: params.basePath;
             utils.prependStringTo(sourceFiles, basePath, "/");
         }
     }
@@ -163,12 +168,21 @@ function processSources(
  * @prop {string} dest - record path
  * @prop {string} webpack - webpacked source path. default `./dist/webpack/index.js`
  * @prop {string} umd - webpacked umd source path. default `./dist/umd/index.js`
+ * @prop {string} bin - webpacked bin source path. default `./dist/bin/index.js`
  * 
  * @typedef TCJBMArgs currentlly support `js` only
  * @prop {string | string[]} basePath - source scan path
  */
 
 
+/**
+ * actually, return value will be like `TVersionString + "-dev"`
+ * 
+ * @type {(v: RegExpExecArray) => TVersionString}
+ */
+const normalizeVersion = (version) => {
+    return /** @type {TVersionString} */(version.slice(0, 3).join(".") + (version[3] || ""));
+}
 /**
  * actually, return value will be like `TVersionString + "-dev"`
  * 
@@ -185,7 +199,7 @@ const decrementVersion = (version) => {
         // @ts-ignore 
         version[0]--, version[1] = version[2] = 99;
     }
-    return /** @type {TVersionString} */(version.slice(0, 3).join(".") + (version[3] || ""));
+    return normalizeVersion(version);
 };
 
 /**
@@ -196,17 +210,20 @@ const ToolFunctions = {
     /** (r)ecord(W)ebpack(S)ize */
     // jstool -cmd rws [-webpack lib/webpack.js -dest "./dev-extras/webpack-size.json"]
     rws: {
+        taskName: "(R)ecord(W)ebpack(S)ize",
         /**
          * @typedef {`${number}.${number}.${number}`} TVersionString
+         * @typedef {[number, number, number]} TNVersion
          */
-        taskName: "(R)ecord(W)ebpack(S)ize",
         fn() {
             const thisPackage = utils.readJson("./package.json");
             const recordPath = params.dest || "./logs/webpack-size.json";
-            /** @type {Record<TVersionString, { webpack?: number; umd?: number}>} */
+            /** @type {Record<TVersionString, Partial<Record<TRwsTags, number>>>} */
             const sizeRecord = fs.existsSync(recordPath)? utils.readJson(recordPath): {};
             /** @type {TVersionString} */
             const versionStr = thisPackage.version;
+            /** @type {(keyof TSizeRecordEntry)[]} */
+            const tags = /** @type {TRwsTags[]} */(["webpack", "umd", "bin"]).concat(params["rws-tags"] || []);
 
             /**
              * @typedef {typeof sizeRecord["0.0.0"]} TSizeRecordEntry
@@ -217,31 +234,36 @@ const ToolFunctions = {
              * @returns 
              */
             const isDiff = (a, b) => {
-                return  (a.webpack && b.webpack) && (a.webpack ^ b.webpack) || (a.umd && b.umd) && (a.umd ^ b.umd);
+                return tags.some(tag => {
+                    const x = a[tag], y = b[tag];
+                    return (!x || !y) || (x ^ y);
+                });
             };
+            /** @type {TSizeRecordEntry} */
             const entry = {};
-            let sourcePath = params.webpack || "./dist/webpack/index.js";
-            if (fs.existsSync(sourcePath)) {
-                entry.webpack = fs.statSync(sourcePath).size;
-            }
-            sourcePath = params.umd || "./dist/umd/index.js";
-            if (fs.existsSync(sourcePath)) {
-                entry.umd = fs.statSync(sourcePath).size;
-            }
+            tags.forEach(tag => {
+                let sourcePath = params[tag] || `./dist/${tag}/index.js`;
+                if (fs.existsSync(sourcePath)) {
+                    entry[tag] = fs.statSync(sourcePath).size;
+                }
+            });
 
-            if (entry.webpack || entry.umd) {
-                const nversion = /** @type {RegExpExecArray} */(/(\d+)\.(\d+)\.(\d+)(-\w+)?/.exec(versionStr));
+            // if (entry.webpack || entry.umd || entry.bin) {
+            if (tags.some(tag => entry[tag])) {
+                let nversion = /** @type {RegExpExecArray} */(/(\d+)\.(\d+)\.(\d+)(-\w+)?/.exec(versionStr));
                 const $0 = nversion.shift();
                 /** @type {TSizeRecordEntry} */
                 let prevEntry = sizeRecord[
                     /** @type {TVersionString} */($0)
                 ];
                 if (!prevEntry) do {
+                    // DEVNOTE: 2023/10/24 - Modified the code to maintain a version string like `1.3.3-dev`!
                     const version = decrementVersion(nversion);
                     prevEntry = sizeRecord[version];
                     if (prevEntry || version.startsWith("0.0.0")) {
                         break;
                     }
+                    nversion = /** @type {RegExpExecArray} */(/(\d+)\.(\d+)\.(\d+)(-\w+)?/.exec(version));
                 } while (1);
 
                 if (prevEntry) {
@@ -250,7 +272,7 @@ const ToolFunctions = {
                         utils.log(sizeRecord);
                         utils.writeTextUTF8(
                             JSON.stringify(sizeRecord, null, 2), recordPath, () => {
-                                console.log("[%s] is updated", recordPath);
+                                console.log("[%s] is updated", recordPath, entry);
                             }
                         );
                     } else {
@@ -267,6 +289,7 @@ const ToolFunctions = {
   note:
     webpack - if not specified then apply "./dist/webpack/index.js"
     umd     - if not specified then apply "./dist/umd/index.js"
+    bin     - if not specified then apply "./dist/bin/index.js"
     dest    - if not specified then apply "./logs/webpack-size.json"`;
         }
     },
@@ -276,6 +299,9 @@ const ToolFunctions = {
     // basePath <js source base directory>
     // jstool -cmd cjbm -basePath extra-tests/mini-semaphore [-targets "['core.js', 'object.js']"]
     // 
+    /**
+     * about regex: see [[tools.js] regex - (C)onvert (J)S to (B)rowser (M)odule](https://regex101.com/r/EpuQLT/23)
+     */
     cjbm: {
         taskName: "(C)onvert (J)S to (B)rowser (M)odule",
         fn() {
@@ -322,7 +348,7 @@ const ToolFunctions = {
   note:
     basePath - can be "<path>,<path>,..." (array type arg)
     targets - must be array type arg, "['<path>', '<path>',...]" or "<path>,<path>,..."`
-        } 
+        }
     },
 
     // jstool -cmd cmtTrick -targets "['core.js', 'object.js']" [-basePath extra-tests/mini-semaphore]
@@ -378,7 +404,8 @@ const ToolFunctions = {
 
     // jstool -cmd version -extras "test/web/index.html,"
     version: {
-        fn: () => {
+        taskName: "version",
+        fn() {
             let {
                 major, minor/*, patch*/,
                 pkgJsons = ["./package.json"]
@@ -408,7 +435,7 @@ const ToolFunctions = {
                 return `"version": "${nextVersion}"`;
             }, pkgJsons);
 
-            const paths = Array.isArray(params.extras)? params.extras: typeof params.extras === "string"? [params.extras]: [];
+            const paths = isArray(params.extras)? params.extras: typeof params.extras === "string"? [params.extras]: [];
             if (paths.length) {
                 utils.fireReplace(/v(\d+\.\d+\.\d+)(-\w+)?/g, /** @type {TStringReplacer} */($0, $1, $2) => {
                     if ($1) {
@@ -454,7 +481,7 @@ const ToolFunctions = {
                 });
             }
             const targets = params.targets;
-            const basePaths = Array.isArray(params.basePath)? params.basePath: [params.basePath];
+            const basePaths = isArray(params.basePath)? params.basePath: [params.basePath];
             processSources(
                 /** @type {string} */(this.taskName), data => {
                     /*
@@ -473,8 +500,9 @@ const ToolFunctions = {
                 }
             );
         },
-        help: `$jstool -cmd rmc  -basePath "./dist/cjs,./dist/cjs/gulp" -test "/\\.(js|d\\.ts)$/"
+        help: `$ jstool -cmd rmc -basePath "./dist/cjs,./dist/cjs/gulp" -test "/\\.(js|d\\.ts)$/"
   note: basePath - can be "<path>,<path>,..." (array type arg)
+        test   - can be omit, defulat \`/\.js$/\`
         rmc4ts - for typescript source.
           keep comment that start with "/*" when "*/" end mark appears in same line.
           if start with "/*-" remove it`
