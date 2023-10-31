@@ -135,10 +135,11 @@ export const acquire = (dis: TFlowableLock, lazy = true) => {
  * @returns {void}
  */
 export const release = (dis: TFlowableLock) => {
-    dis.capacity++;
     if (dis.q.length) {
         // DEVNOTE: Will never reach `THROW`
-        dis.capacity -= 1, (dis.q.shift() || /* istanbul ignore next */THROW)();
+        (dis.q.shift() || /* istanbul ignore next */THROW)();
+    } else {
+        dis.capacity++;
     }
     if (dis.capacity > dis.limit) {
         console.warn("inconsistent release!");

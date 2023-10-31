@@ -2,11 +2,11 @@
 /**
  * arrayMove
  * 
- * @param src 
- * @param si 
- * @param dst 
- * @param di 
- * @param len 
+ * @param src
+ * @param si source index
+ * @param dst
+ * @param di dest index
+ * @param len move count
  */
 const am = /* istanbul ignore next */(
     src: any[], si: number,
@@ -170,7 +170,7 @@ const rt = <T>(dis: Deque<T>, n: number) => {
     // old capacity
     const oc = dis._c;
     dis._c = n;
-//* ctt
+    //* ctt
     const lastIndex = dis._f + dis._l;
     /* istanbul ignore next */
     if (lastIndex > oc) {
@@ -178,7 +178,7 @@ const rt = <T>(dis: Deque<T>, n: number) => {
         const mc = (lastIndex) & (oc - 1);
         am(dis._a, 0, dis._a, oc, mc);
     }
-/*/
+    /*/
     const f = dis._f;
     const l = dis._l;
     // istanbul ignore next
@@ -187,5 +187,5 @@ const rt = <T>(dis: Deque<T>, n: number) => {
         const mc = (f + l) & (oc - 1);
         am(dis._a, 0, dis._a, oc, mc);
     }
-//*/
+    //*/
 };
