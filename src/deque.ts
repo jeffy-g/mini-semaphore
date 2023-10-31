@@ -44,7 +44,7 @@ const gc = (n?: number) => {
 /**
  * ### Implementation restricted to FIFO
  * 
- * this class is based on https://github.com/petkaantonov/deque/blob/master/js/deque.js
+ * this class is based on https://github.com/petkaantonov/deque/blob/master/js/deque.js  
  * Released under the MIT License: https://github.com/petkaantonov/deque/blob/master/LICENSE
  */
 export class Deque<T extends any> {
@@ -170,12 +170,22 @@ const rt = <T>(dis: Deque<T>, n: number) => {
     // old capacity
     const oc = dis._c;
     dis._c = n;
+//* ctt
+    const lastIndex = dis._f + dis._l;
+    /* istanbul ignore next */
+    if (lastIndex > oc) {
+        // move items count
+        const mc = (lastIndex) & (oc - 1);
+        am(dis._a, 0, dis._a, oc, mc);
+    }
+/*/
     const f = dis._f;
     const l = dis._l;
-    /* istanbul ignore next */
+    // istanbul ignore next
     if (f + l > oc) {
         // move items count
         const mc = (f + l) & (oc - 1);
         am(dis._a, 0, dis._a, oc, mc);
     }
+//*/
 };
