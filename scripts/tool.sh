@@ -73,6 +73,9 @@ copytypes() {
 
   # echo "${commands[@]@Q}"
   npx concurrently -n "${names}" -c red,green,yellow,blue "${commands[@]@Q}" # need quote
+  . ${SCRIPT_DIR}/shift-ext.sh
+  # shopt -s extglob
+  shift-extension "ts" "mts" "mv" ./dist/{esm,webpack-esm}/*d.ts
 }
 
 webpack() {
