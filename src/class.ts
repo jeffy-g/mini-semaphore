@@ -107,7 +107,10 @@ export class MiniSemaphore implements core.TFlowableLock {
     }
     /**
      * automatic acquire/release
-     * @param process 
+     * 
+     * @template {any} T description
+     * @param {() => Promise<T>} process
+     * @param {boolean=} lazy
      */
     async flow<T>(process: () => Promise<T>, lazy?: boolean): Promise<T> {
         // return f(this, process, lazy);
