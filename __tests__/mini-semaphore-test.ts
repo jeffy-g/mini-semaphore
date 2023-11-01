@@ -8,6 +8,7 @@ import type {
   create as FNcreate,
   restrictor as NSrestrictor
 } from "../src/";
+type TSignal = (arg?: any) => void;
 
 
 const WAIT = 5;
@@ -63,8 +64,6 @@ const basicTest = async (s: TFlowableLock, lazy: boolean) => {
   assert.equal(ran, 5);
 };
 
-type TSignal = (arg?: any) => void;
-
 eachModule("../src/");
 eachModule("../dist/");
 eachModule("../dist/umd/");
@@ -84,7 +83,7 @@ function eachModule(path: string) {
       MiniSemaphore, create, restrictor
       // DEVNOTE: 2023/11/01 - `cjs` module are wrap to `default`
     } = mod.default || mod);
-  })
+  });
 
   describe(`concurrency: module=[${path}]`, function () {
     describe("mini semaphore", function () {
