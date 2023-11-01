@@ -31,6 +31,8 @@ module.exports = {
   testRegex: "/__tests__/.*\\.tsx?$",
   collectCoverageFrom: [
     // all ?
+    "./src/!(*.d.ts)",
+    "./dist/{cjs,esm,umd,webpack,webpack-esm}/**/!(*.d.ts)",
   ],
   moduleFileExtensions: [
     "ts", "js", "mjs"
