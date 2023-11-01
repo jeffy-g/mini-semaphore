@@ -54,8 +54,7 @@ const wppHandlerV5 = ((renderer, cwd) => {
                 args[1] = str.substring(x + cwd.length);
             }
         }
-        str = args[0];
-        args = args.slice(1);
+        str = args.shift() || "";
         renderer(
             `pct: ${(percentage * 100).toFixed(4)}%, process: [${message}]${str ? `, info: [${str}]` : ""}${args.length ? " - " : ""}${args.join(", ")}`
         );
@@ -65,7 +64,7 @@ const wppHandlerV5 = ((renderer, cwd) => {
 })(lib.renderLine, process.cwd());
 
 
-
+/** @type {boolean} */
 let checkedCache;
 /**
  * @type {() => boolean}
@@ -73,6 +72,7 @@ let checkedCache;
 const isWebpackV5later = () => {
     if (checkedCache === void 0) {
         try {
+            // @ts-ignore 
             const webpack = require("webpack");
             checkedCache = +webpack.version[0] > 4;
         } catch (e) {

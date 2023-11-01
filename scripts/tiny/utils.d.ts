@@ -1,25 +1,9 @@
 /*!
-  The MIT License (MIT)
-
-  Copyright (c) 2022 jeffy-g hirotom1107@gmail.com
-
-  Permission is hereby granted, free of charge, to any person obtaining a copy
-  of this software and associated documentation files (the "Software"), to deal
-  in the Software without restriction, including without limitation the rights
-  to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-  copies of the Software, and to permit persons to whom the Software is
-  furnished to do so, subject to the following conditions:
-
-  The above copyright notice and this permission notice shall be included in
-  all copies or substantial portions of the Software.
-
-  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-  THE SOFTWARE.
+ - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+  Copyright (C) 2022 jeffy-g <hirotom1107@gmail.com>
+  Released under the MIT license
+  https://opensource.org/licenses/mit-license.php
+ - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 */
 /// <reference types="node"/>
 /// <reference path="./basic-types.d.ts"/>
@@ -59,39 +43,6 @@ export function prependStringTo(str_array: string[], content: string, suffix?: s
  *  + should be truthy/falsy value
  */
 export function dateStringForFile(ymd?: any): string;
-/**
- * get arguments helper.
- * extra params must be start with "-".
- *
- * > command example:
- *
- * ```shell
- * node <script path> -minify -t es6 -values "value0,value1,value2" -array "['value0', 100, true, /\r?\n/g]" -regex "/\d+/g"
- * ```
- *
- * + then resut is
- *
- * ```js
- * // params
- * {
- *   minify: true,
- *   t: "es6",
- *   values: ["value0", "value1", "value2"],
- *   array: ["value0", 100, true, /\r?\n/g],
- *   regex: /\d+/g,
- * }
- * ```
- *
- * if param value not specified -tag after then set value is "true".
- *
- * @template {Record<string, any>} T
- * @param {Partial<typeof ArgsConfig>} [args_config]
- * @param {boolean} [debug]
- * @returns {T & { args?: string[] }}
- */
-export function getExtraArgs<T extends Record<string, any>>(args_config?: Partial<typeof ArgsConfig>, debug?: boolean): T & {
-    args?: string[];
-};
 
 /**
  * write text content to dest path.

@@ -15,6 +15,7 @@
 const fs = require("fs");
 /* utilities module by own. */
 const utils = require("./utils");
+const tinArgs = require("tin-args");
 
 /**
  * @typedef TToolArgs
@@ -45,9 +46,9 @@ const utils = require("./utils");
  */
 
 /**
- * @type {ReturnType<typeof utils.getExtraArgs<TToolArgs>>}
+ * @type {ReturnType<typeof tinArgs<TToolArgs>>}
  */
-const params = utils.getExtraArgs();
+const params = tinArgs();
 utils.log(params);
 
 const verbose = params.verb;
