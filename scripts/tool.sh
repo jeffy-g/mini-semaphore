@@ -75,7 +75,7 @@ copytypes() {
   npx concurrently -n "${names}" -c red,green,yellow,blue "${commands[@]@Q}" # need quote
   . ${SCRIPT_DIR}/shift-ext.sh
   # shopt -s extglob
-  shift-extension "ts" "mts" "mv" ./dist/{esm,webpack-esm}/*d.ts
+  shift-extension "ts" "mts" "mv" ./dist/{webpack-,}esm/*d.ts
 }
 
 webpack() {
@@ -87,7 +87,7 @@ makeMjs() {
   jstool -cmd "cjbm" -basePath "./dist/esm" -ext "mjs"
   . ${SCRIPT_DIR}/shift-ext.sh
   # shopt -s extglob
-  shift-extension "js" "mjs" "mv" ./dist/{esm,webpack-esm}/*.js
+  shift-extension "js" "mjs" "mv" ./dist/{webpack-,}esm/*.js
   return 0
 }
 
