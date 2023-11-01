@@ -29,9 +29,11 @@ module.exports = {
   },
   // default: (/__tests__/.*|(\\.|/)(test|spec))\\.[jt]sx?$
   testRegex: "/__tests__/.*\\.tsx?$",
+  collectCoverageFrom: [
+    // all ?
+  ],
   moduleFileExtensions: [
-    "ts",
-    "js"
+    "ts", "js", "mjs"
   ],
   projects: ["<rootDir>"]
 };
