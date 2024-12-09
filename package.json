@@ -54,13 +54,14 @@
     "fire:tool": "bash scripts/tool.sh",
     "ic": "rimraf -g yarn.lock node_modules && yarn install",
     "up": "yarn upgrade-interactive --latest",
-    "lint": "eslint src/**/*.ts",
+    "lint": "bash -c \"ESLINT_USE_FLAT_CONFIG=false npx eslint src/**/*.ts\"",
     "v:tag": "yarn fire:tool patch_with_tag",
     "pretest": "rimraf -g ./coverage/*",
     "test": "bash -c \"NODE_OPTIONS=--experimental-vm-modules npx jest --coverage --silent=false -c=jest.config.js\""
   },
   "devDependencies": {
     "@jeffy-g/cpx": "^1.6.4",
+    "@stylistic/eslint-plugin": "^2.12.0",
     "@types/jest": "^29.5.6",
     "@types/webpack": "^5.28.3",
     "@typescript-eslint/eslint-plugin": "^8.0.0",
