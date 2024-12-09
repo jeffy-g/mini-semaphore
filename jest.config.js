@@ -24,7 +24,19 @@ module.exports = {
   // `transform` property implicitly sets preset to "ts-jest"
   transform: {
     "^.+\\.tsx?$": [
-      "ts-jest", { useESM: true }
+      "ts-jest", {
+        useESM: true,
+        tsconfig: {
+          // DEVNOTE: 2024/12/09 - The `target` option does not seem to be necessary.
+          // target: "es2020",
+          // TIP: Dynamic imports are only supported when the '--module' flag is set to
+          // 'es2020', 'es2022', 'esnext', 'commonjs', 'amd', 'system', 'umd', 'node16', or 'nodenext'.
+          module: "es2020",
+          // esModuleInterop: true,
+          // DEVNOTE: 2024/12/09 - This flag is automatically turned on if the `esModuleInterop` flag is enabled.
+          allowSyntheticDefaultImports: true,
+        },
+      }
     ]
   },
   // default: (/__tests__/.*|(\\.|/)(test|spec))\\.[jt]sx?$
