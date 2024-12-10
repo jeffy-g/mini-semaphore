@@ -5,47 +5,18 @@
   https://opensource.org/licenses/mit-license.php
  - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 */
-import tinyProgress from "../scripts/tiny-progress";
+// @ts-ignore avoid ts-jest semantic error
+import { stressTest } from "../scripts/stress-test.mjs";
+// @ts-ignore avoid ts-jest semantic error
+import type { TStressContext } from "../scripts/stress-test.mjs";
+import type { create as FNcreate } from "../src/";
 
-import type {
-  TFlowableLock,
-  create as FNcreate,
-} from "../src/";
 
-
-const MAX = 500;
-const delay = (ms: number) => new Promise<void>(r => setTimeout(r, ms));
-const rndDelayTime = (low = 10, limit = 1000) => {
-  return (Math.random() * limit + low) | 0;
+const stressContext: TStressContext = {
+  max: 500,
+  wait_high: 200,
+  wait_low: 5
 };
-
-async function stressTest(s: TFlowableLock) {
-  let counter!: number;
-  const msgEmitter = () => {
-    return `Stress test | executed task: ${(counter + "").padStart(3)}, pending task: ${(s.pending + "").padEnd(5)}`;
-  };
-
-  const promises: Promise<void>[] = [];
-  const progress = tinyProgress.create(30, msgEmitter);
-
-  counter = 0;
-  s.setRestriction(12);
-
-  progress.newLine();
-  progress.run();
-  for (; counter < MAX;) {
-    promises[counter++] = s.flow(async () => {
-        await delay(rndDelayTime(5, 250));
-    }, false);
-    await delay(1);
-  }
-  await Promise.all(promises);
-  progress.stop();
-  progress.deadline();
-
-  expect(s.pending).toBe(0);
-}
-
 
 eachModule("../src/");
 eachModule("../dist/");
@@ -70,7 +41,14 @@ function eachModule(path: string) {
       it("mini-semaphore stress test\n\
       execute many tasks that require processing time at random times(in ms) to check reliability. (object)", async () => {
         // tight acquire - Note the value of "s.pending"
-        await stressTest(create(0) as TFlowableLock);
+        await stressTest(
+          create(10), stressContext,
+          // @ts-ignore avoid ts-jest semantic error
+          (s, total) => {
+            expect(s.pending).toBe(0);
+            expect(total).toBe(stressContext.max);
+          }
+        );
       }, 180 * 1000);
     });
   });
