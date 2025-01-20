@@ -3341,10 +3341,10 @@ test-exclude@^6.0.0:
     glob "^7.1.4"
     minimatch "^3.0.4"
 
-tin-args@^0.0.13:
-  version "0.0.13"
-  resolved "https://registry.yarnpkg.com/tin-args/-/tin-args-0.0.13.tgz#0182e99e897c4436efe60f91fdd0d0eff2007af4"
-  integrity sha512-C2dcpd8oscjO3n8M/yPtFqr3NEdPzJZPKlW0mJY/2aesJL6+jBouygadytFiH737qFlY4m26x9BER8XdEErkCw==
+tin-args@^0.0.14:
+  version "0.0.14"
+  resolved "https://registry.yarnpkg.com/tin-args/-/tin-args-0.0.14.tgz#83c35d033f59655cf34eda5e6eed64ec6b29868f"
+  integrity sha512-PUU5bHIo/N+4UDwnXGTglTKZQWLO8hgK4KJhZ4REKZQ1zHbMvfUPv10cLJvLHiUbS1Jx1oFjG069ElyralNt6A==
 
 tmpl@1.0.5:
   version "1.0.5"
