@@ -7,11 +7,11 @@
 */
 import * as semaphore from "../dist/esm/index.mjs";
 import * as tinyProgress from "./tiny-progress.js";
-import * as tinargs from "tin-args";
+import tinargs from "tin-args";
 
 
 /**
- * @typedef {ReturnType<semaphore.create>} IFlow ok
+ * @typedef {ReturnType<typeof semaphore.create>} IFlow ok
  * @typedef {object} TStressContext stress test parameters
  * @prop {number} max task count
  * @prop {number} wait_low wait low value
@@ -56,7 +56,7 @@ export async function stressTest(s, context, cb) {
 
     counter = accIndex = 0;
     progress.newLine();
-    progress.run();
+    // progress.run();
     for (; counter < context.max;) {
         promises[counter++] = s.flow(async () => {
             await delay(rndDelayTime(context.wait_low, context.wait_high));
@@ -64,6 +64,7 @@ export async function stressTest(s, context, cb) {
             //   
             toucher[accIndex++ % restriction]++;
         }, false);
+        progress.renderAsync();
         await delay(1);
     }
 
@@ -78,7 +79,7 @@ export async function stressTest(s, context, cb) {
     cb && cb(s, total);
 }
 
-if (tinargs.default().x) {
+if (tinargs().x) {
     // node ./scripts/stress-test.mjs -x
     stressTest(
         semaphore.create(RESTRICT), DEFAULT_CONTEXT

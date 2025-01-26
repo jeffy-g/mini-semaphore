@@ -58,6 +58,7 @@ export function createProgressObject(frames: string[], formatOpt: TProgressForma
      * @param {number} fps
      */
     setFPS(fps: number): void;
+    renderAsync(): void;
     /**
      * run timer (30fps)
      */

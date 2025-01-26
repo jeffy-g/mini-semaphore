@@ -10,10 +10,12 @@ import type {
 } from "../src/";
 type TSignal = (arg?: any) => void;
 
-
+const isCI = process.env.CI;
 const WAIT = 5;
 const delay = (ms: number) => new Promise<void>(r => setTimeout(r, ms));
 const URL = "https://www.w3.org/2008/site/images/header-link.gif";
+const warn = isCI ? () => {}: console.warn;
+const log = isCI ? warn: console.log;
 
 const basicTest = async (s: TFlowableLock, lazy: boolean) => {
   // change restriction
@@ -30,13 +32,13 @@ const basicTest = async (s: TFlowableLock, lazy: boolean) => {
       const p = s.pending;
       if (p === 98) {
         const tspent = performance.now() - st;
-        console.log("s.pending => %s, tspent: %s", p, tspent);
+        log("s.pending => %s, tspent: %s", p, tspent);
       }
       backet.push(++count);
     }, lazy);
   }
   // assert.equal(s.pending, 98);
-  console.log("basicTest::[after-for(lazy: %s)] s.pending => %s", lazy, s.pending);
+  log("basicTest::[after-for(lazy: %s)] s.pending => %s", lazy, s.pending);
   count += 10;
   // At this point, the count value by the `flow` process should not be done yet
   expect(count).toEqual(10);
@@ -163,7 +165,7 @@ function eachModule(path: string) {
         await s.flow(task(4));
         await s.flow(task(5));
         const tspent = performance.now() - start;
-        console.log("tspent:", tspent);
+        log("tspent:", tspent);
 
         assert.equal(ran, 4);
         assert.equal(erred, 1);
@@ -179,7 +181,6 @@ function eachModule(path: string) {
         let ran = 0;
         let e: string | Error | undefined;
         const task = (i: number) => async () => {
-          // console.log(i);
           assert(running <= 1);
           running++;
           await delay(5);
@@ -198,8 +199,6 @@ function eachModule(path: string) {
           )
         ).catch(() => e = "apple pie");
         const tspent = performance.now() - start;
-        // console.log("tspent:", tspent);
-
         await delay((tspent | 0) + 10);
         if (e instanceof Error) {
           assert.equal(e.message, "2!");
@@ -211,7 +210,7 @@ function eachModule(path: string) {
         // expect(foo).to.be.a('string');
         assert.equal(ran, 4);
         assert.equal(s.capacity, 2);
-        console.log("which catched?:", e);
+        log("which catched?:", e);
       });
 
       it("Illegal call to `release` method (The warning message 'inconsistent release!' is logged, but the object continues to work without breaking)", async function () {
@@ -257,7 +256,7 @@ function eachModule(path: string) {
           expect(token).toMatch(/G2?-\d+/);
           // expect(token.split("-")[1]).toMatch(/\d+/);
         });
-        console.log("array: ", array);
+        log("array: ", array);
 
         await restrictor.one("keep", () => Promise.resolve());
         // when more than 1 sec oldies
@@ -276,7 +275,7 @@ function eachModule(path: string) {
             text = await fetch(URL).then(res => res.text());
           });
         } catch (e) {
-          console.warn(e);
+          warn(e);
         }
         // @ts-ignore 
         assert.equal(text[0], "G");    // gif
@@ -291,7 +290,7 @@ function eachModule(path: string) {
             text = await fetch(URL).then(res => res.text());
           });
         } catch (e) {
-          console.warn(e);
+          warn(e);
           error = e as Error;
         }
         assert(error instanceof TypeError);
@@ -304,7 +303,7 @@ function eachModule(path: string) {
             text = await fetch(URL).then(res => res.text());
           });
         } catch (e) {
-          console.warn(e);
+          warn(e);
           error = e as Error;
         }
         assert.equal(text, "");

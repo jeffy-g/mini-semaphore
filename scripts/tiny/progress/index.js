@@ -85,7 +85,8 @@ const createProgressObject = (frames, formatOpt, callback) => {
 
     let done = false;
     const render = () => {
-        progress(callback(), done);
+        process.nextTick(progress, callback(), done);
+        // progress(callback(), done);
     };
 
     let progress = createProgressSync(frames, formatOpt);
@@ -129,6 +130,7 @@ const createProgressObject = (frames, formatOpt, callback) => {
                 timer = setInterval(render, ms);
             }
         },
+        renderAsync: render,
         /**
          * run timer (30fps)
          */
