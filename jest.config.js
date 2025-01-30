@@ -3,6 +3,9 @@
 //
 module.exports = {
   preset: "ts-jest/presets/default-esm", // MUST
+  // this is optional?
+  testEnvironment: "node",
+  verbose: true,
   /*
    * ts-jest[ts-jest-transformer] (WARN) Define `ts-jest` config under `globals` is deprecated. Please do
    * transform: {
@@ -12,15 +15,6 @@ module.exports = {
    *   ],
    * }
    */
-  // globals: {
-  //   "ts-jest": {
-  //     // tsconfig: "./src/tsconfig.json", // <- needless
-  //     useESM: true
-  //   }
-  // },
-  // this is optional?
-  testEnvironment: "node",
-  verbose: true,
   // `transform` property implicitly sets preset to "ts-jest"
   transform: {
     "^.+\\.tsx?$": [

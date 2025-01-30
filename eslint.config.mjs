@@ -1,4 +1,4 @@
-import globals from "globals";
+// import globals from "globals";
 import tsesconfig from "typescript-eslint";
 import tsparser from "@typescript-eslint/parser";
 import tseslintPlugin from "@typescript-eslint/eslint-plugin";
@@ -32,40 +32,32 @@ export default tsesconfig.config(
   ],
   files: ["src/**/*.ts"],
   languageOptions: {
-    // 2. env オプションは無くなり、代わりに globals を使用するようになりました。
-    globals: {
-      // ...globals.browser,
-      // ...globals.node,
-      ...globals.es2021
-    },
+    // // 2. env オプションは無くなり、代わりに globals を使用するようになりました。
+    // globals: {
+    //   // ...globals.browser,
+    //   // ...globals.node,
+    //   ...globals.es2021
+    // },
     // eslintrc の parserOptions と同じです。
     parserOptions: {
       sourceType: "script",
       parser: tsparser,
-      // project: true,  
-      // ecmaFeatures: { 
-      //   modules: true
-      // },
-      // // project: "tsconfig.json",
-      ecmaVersion: 2022,
+      // ecmaVersion: 2022,
     },
   },
 
   // 3. plugin は名称を指定できるようになりましたが、注意があります。
   plugins: {
-    "@typescript-eslint": tseslintPlugin,
+    "@tseslintPlugin": tseslintPlugin,
     "@stylistic": stylistic,
   },
   rules: {
-    // "@typescript-eslint/indent": "error",
-    indent: ["warn", 4, {
+    // "@tseslintPlugin/array-type": ["warn", {
+    //   default: "array-simple"
+    // }],
+    "@stylistic/indent": ["warn", 4, {
       SwitchCase: 1
     }],
-    // see https://github.com/typescript-eslint/typescript-eslint/tree/master/packages/eslint-plugin#supported-rules
-    "@typescript-eslint/array-type": ["warn", {
-      default: "array-simple"
-    }],
-    // "@typescript-eslint/await-thenable": 1, // DEVNOTE: error...
     "@stylistic/member-delimiter-style": [
       "error",
       {
@@ -79,19 +71,43 @@ export default tsesconfig.config(
         }
       }
     ],
-    "@typescript-eslint/no-require-imports": "error",
-    "@typescript-eslint/no-var-requires": "error",
-    "prefer-function-type": "off",
-
-    quotes: ["error", "double", { avoidEscape: true }],
-
-    semi: ["error", "always"],
-    "semi-spacing": ["error", { after: true, before: false }],
-    "semi-style": ["error", "last"],
-    "no-extra-semi": "error",
+    "@stylistic/prefer-function-type": "off",
+    "@stylistic/quotes": ["error", "double", { avoidEscape: true }],
+    "@stylistic/semi": ["error", "always"],
+    "@stylistic/semi-spacing": ["error", { after: true, before: false }],
+    "@stylistic/semi-style": ["error", "last"],
+    "@stylistic/no-extra-semi": "error",
     "no-unexpected-multiline": "error",
     "no-unreachable": "error",
 
+    "@stylistic/comma-dangle": "off",
+    // https://eslint.org/docs/rules/keyword-spacing
+    "@stylistic/keyword-spacing": "error",
+    "@stylistic/max-len": [
+      "error", {
+        code: 250, comments: 150
+      }
+    ],
+    "@stylistic/no-trailing-spaces": [
+      "error", {
+        ignoreComments: true
+      }
+    ],
+    "@stylistic/padding-line-between-statements": [
+      "off", {
+        blankLine: "always",
+        prev: "*",
+        next: "return"
+      }
+    ],
+
+    "id-denylist": "error",
+    "id-match": "error", // see https://eslint.org/docs/rules/id-match
+    "no-cond-assign": "off",
+    "max-classes-per-file": [
+      "error", 4
+    ],
+    radix: "off",
     camelcase: [
       "error", {
         allow: [
@@ -99,39 +115,9 @@ export default tsesconfig.config(
         ]
       }
     ],
-    "comma-dangle": "off",
     curly: [
       "error",
       "multi-line"
     ],
-    "id-denylist": "error",
-    "id-match": "error", // see https://eslint.org/docs/rules/id-match
-    "max-classes-per-file": [
-      "error",
-      4
-    ],
-    "max-len": [
-      "error", {
-        code: 1500, comments: 250
-      }
-    ],
-    // "no-cond-assign": "off",
-    "no-trailing-spaces": [
-      "error",
-      {
-        ignoreComments: true
-      }
-    ],
-    "padding-line-between-statements": [
-      "off",
-      {
-        blankLine: "always",
-        prev: "*",
-        next: "return"
-      }
-    ],
-    radix: "off",
-    // https://eslint.org/docs/rules/keyword-spacing
-    "keyword-spacing": "error",
   }
 });
