@@ -80,7 +80,7 @@ copytypes() {
 
 webpack() {
   # npx rimraf "./dist/webpack/*" "./dist/umd/*" "./dist/webpack-esm/*"
-  [ -z $CI ] && npx webpack || npx webpack>/dev/null
+  [ -z $CI ] && npx webpack || npx webpack >/dev/null
 }
 
 makeMjs() {
