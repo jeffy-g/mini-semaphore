@@ -57,6 +57,8 @@
     "lint:legacy": "bash -c 'ESLINT_USE_FLAT_CONFIG=false npx eslint src/**/*.ts'",
     "v:tag": "yarn fire:tool patch_with_tag",
     "pretest": "rimraf -g ./coverage/*",
+    "git:push": "yarn fire:tool force_push",
+    "postgit:push": "git gc --aggressive --prune=now",
     "test": "bash -c 'NODE_OPTIONS=--experimental-vm-modules npx jest --coverage --silent=false -c=jest.config.js'",
     "stress:demo": "node ./scripts/stress-test.mjs -x"
   },

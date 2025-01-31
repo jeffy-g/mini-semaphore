@@ -22,6 +22,15 @@ jstool() {
   node "./scripts/tiny/tools.js" $*
 }
 
+force_push() {
+  local branch_name=$(git branch --contains=HEAD)
+  branch_name=${branch_name/* /}
+  for remote in $(git remote); do
+    echo "- - - - brach [${branch_name}], remote: [$remote] - - - -"
+    git push --tags --force --progress $remote ${branch_name}:${branch_name}
+  done
+}
+
 patch_with_tag() {
   local ret=$(jstool -cmd "version" -extras "./src/index.ts," $1);
   local after=$(echo $ret | sed -E 's/.*version updated: ([0-9]+\.[0-9]+\.[0-9]+).*/\1/');
@@ -42,7 +51,7 @@ distExtra() {
 
   jstool -cmd rmc -rmc4ts -basePath "dist/cjs,dist/esm"
   # js to mjs
-  makeMjs
+  make_mjs
   # Revived `stripWebpack`
   jstool -cmd stripWebpack
 }
@@ -65,7 +74,7 @@ copytypes() {
 
   # echo "${commands[@]@Q}"
   npx concurrently -n "${names}" -c red,green,yellow,blue "${commands[@]@Q}" # need quote
-  fire-shift-ext ts mts d.ts
+  fire_shift_ext ts mts d.ts
   return $?
 }
 
@@ -74,16 +83,16 @@ webpack() {
   [ -z $CI ] && npx webpack || npx webpack >/dev/null
 }
 
-makeMjs() {
+make_mjs() {
   jstool -cmd "cjbm" -basePath "./dist/esm" -ext "mjs"
-  fire-shift-ext js mjs js
+  fire_shift_ext js mjs js
   return $?
 }
 
-fire-shift-ext() {
+fire_shift_ext() {
   . ${SCRIPT_DIR}/shift-ext.sh
   # shopt -s extglob
-  shift-extension $1 $2 "mv" ./dist/{webpack-,}esm/*.$3
+  shift_extension $1 $2 "mv" ./dist/{webpack-,}esm/*.$3
   return $?
 }
 

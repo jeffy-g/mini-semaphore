@@ -4,17 +4,17 @@
 # version 2.0 - 2023/10/23
 # version 3.0 - 2025/1/31
 #
-shift-extension() {
+shift_extension() {
 
   if [ "$1" = "" ]; then
     cat <<_EOT_
-- - - - - - - - - - shift-extension: help - - - - - - - - - -
+- - - - - - - - - - shift_extension: help - - - - - - - - - -
 
- shift-extension <before extension> <after extension> [<apply command>] <file pattern>
+ shift_extension <before extension> <after extension> [<apply command>] <file pattern>
  
      about <apply command>: e.g - "git mv" or "mv" etc ...?
 
-- - - - - - - - - - shift-extension: help - - - - - - - - - -
+- - - - - - - - - - shift_extension: help - - - - - - - - - -
 _EOT_
     return 0
   fi
@@ -40,7 +40,7 @@ _EOT_
     # or below
     # if [[ ! -z $transformer ]]; then
     files=${*// /\x0a}
-    printf "${green}[shift-extension] terget files:$reset\n" $files
+    printf "${green}[shift_extension] terget files:$reset\n" $files
     printf "${purple}%s$reset\n" $files
     for f in $*; do
       if [[ $f =~ $re_origin_ext ]]; then
@@ -52,7 +52,7 @@ _EOT_
     done
   else
     # ${yellow}yellow$reset
-    printf "${red}[shift-extension:DEBUG] ${yellow}terget files: $*  $reset\n"
+    printf "${red}[shift_extension:DEBUG] ${yellow}terget files: $*  $reset\n"
     for f in $*; do
       if [[ $f =~ $re_origin_ext ]]; then
         local after=$(echo $f | sed -E $re_oring2after)
@@ -66,5 +66,5 @@ _EOT_
 # test: 2023-10-23 - OK
 #
 # $ bash scripts/shift-ext.sh "js" "mjs" "mv" ./dist/{esm,webpack-esm}/*.js
-# echo "run shift-extension $*"
-# shift-extension $*
+# echo "run shift_extension $*"
+# shift_extension $*
