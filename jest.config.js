@@ -35,7 +35,7 @@ module.exports = {
   },
   // default: (/__tests__/.*|(\\.|/)(test|spec))\\.[jt]sx?$
   // testRegex: "/__tests__/stress-test.ts",
-  testRegex: "/__tests__/.*\\.tsx?$",
+  testRegex: "/__tests__/.*test\\.tsx?$",
   collectCoverageFrom: [
     // all ?
     "./src/!(*.d.ts)",
