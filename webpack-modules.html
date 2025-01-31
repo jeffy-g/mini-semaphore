@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>webpack build test (umd, esm)</title>
+  <script src="./dist/umd/index.js"></script>
+  <script>
+    function doIt() {
+      const pre = document.getElementById("rmc-out");
+      let sm_esm = {};
+      if (typeof NsMiniSemaphore === "object") {
+        // class
+        sm_esm = new NsMiniSemaphore.MiniSemaphore(10);
+      }
+      // object
+      const sm_umd = MiniSema.create(10);
+
+      pre.textContent = `// new NsMiniSemaphore.MiniSemaphore(10) [https?]
+${JSON.stringify(sm_esm, null, 2)}
+// MiniSema.create(10);
+${JSON.stringify(sm_umd, null, 2)}
+`;
+    }
+    document.addEventListener("DOMContentLoaded", () => {
+      doIt();
+    });
+  </script>
+  <script type="module">
+    import * as s from "./dist/webpack-esm/index.mjs";
+    console.log(s);
+    globalThis.NsMiniSemaphore = s;
+  </script>
+  <style>
+    .output {
+      padding: 6px;
+      font-family: consolas;
+      font-size: 16px;
+      border-radius: 8px;
+      border: solid 1px rgba(192, 192, 192, 0.582);
+      background: whitesmoke;
+    }
+  </style>
+</head>
+
+<body>
+  <pre id="rmc-out" class="output"></pre>
+</body>
+
+</html>
