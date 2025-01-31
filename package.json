@@ -47,7 +47,7 @@
     "typescript"
   ],
   "scripts": {
-    "all": "yarn clean && yarn lint && yarn dist && yarn fire:tool copytypes",
+    "all": "yarn clean && eslint && yarn dist && yarn fire:tool copytypes",
     "build": "yarn fire:tool build",
     "clean": "rimraf -g build/* dist/* logs/*.tsbuildinfo",
     "dist": "yarn build && yarn fire:tool distExtra",
