@@ -1,27 +1,17 @@
 #!/bin/bash -x
-#
-#  The MIT License (MIT)
-#
-#  Copyright (c) 2022 jeffy-g hirotom1107@gmail.com
-#
-#  Permission is hereby granted, free of charge, to any person obtaining a copy
-#  of this software and associated documentation files (the "Software"), to deal
-#  in the Software without restriction, including without limitation the rights
-#  to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-#  copies of the Software, and to permit persons to whom the Software is
-#  furnished to do so, subject to the following conditions:
-#
-#  The above copyright notice and this permission notice shall be included in
-#  all copies or substantial portions of the Software.
-#
-#  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-#  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-#  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-#  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-#  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-#  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-#  THE SOFTWARE.
-#
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+#  Copyright (C) 2022 jeffy-g <hirotom1107@gmail.com>
+#  Released under the MIT license
+#  https://opensource.org/licenses/mit-license.php
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+export reset="\033[0m"
+export red="\033[31m"
+export green="\033[32m"
+export yellow="\033[33m"
+export cyan="\033[36m"
+export white="\033[37m"
+
 SCRIPT_DIR=$(cd $(dirname $0); pwd)
 cpxopt=$([ -z $CI ] && echo "-v" || echo "")
 
@@ -73,9 +63,8 @@ copytypes() {
 
   # echo "${commands[@]@Q}"
   npx concurrently -n "${names}" -c red,green,yellow,blue "${commands[@]@Q}" # need quote
-  . ${SCRIPT_DIR}/shift-ext.sh
-  # shopt -s extglob
-  shift-extension "ts" "mts" "mv" ./dist/{webpack-,}esm/*d.ts
+  fire-shift-ext ts mts d.ts
+  return $?
 }
 
 webpack() {
@@ -85,10 +74,15 @@ webpack() {
 
 makeMjs() {
   jstool -cmd "cjbm" -basePath "./dist/esm" -ext "mjs"
+  fire-shift-ext js mjs js
+  return $?
+}
+
+fire-shift-ext() {
   . ${SCRIPT_DIR}/shift-ext.sh
   # shopt -s extglob
-  shift-extension "js" "mjs" "mv" ./dist/{webpack-,}esm/*.js
-  return 0
+  shift-extension $1 $2 "mv" ./dist/{webpack-,}esm/*.$3
+  return $?
 }
 
 if [ ! -z $1 ]; then

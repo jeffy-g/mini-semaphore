@@ -1,6 +1,6 @@
 {
   "compilerOptions": {
-    "noCheck": true,
+    // "noCheck": true,
     "incremental": true,
     "tsBuildInfoFile": "./logs/cjs.tsbuildinfo",
 

@@ -9,7 +9,7 @@ shift-extension() {
     cat <<_EOT_
 - - - - - - - - - - shift-extension: help - - - - - - - - - -
 
- shift-extension <file pattern> <before extension> <after extension> [<apply command>]
+ shift-extension <before extension> <after extension> [<apply command>] <file pattern>
  
      about <apply command>: e.g - "git mv" or "mv" etc ...?
 
@@ -24,16 +24,16 @@ _EOT_
   # NEED a double quote to expand vars
   local re_oring2after="s/(.*)$re_origin_ext/\1\.$2/"
 
-  local transformer=$3
+  local transformer=$(which $3)
 
   [ ! -z $debug ] && echo re_origin_ext=$re_origin_ext   # OK
   [ ! -z $debug ] && echo re_oring2after=$re_oring2after # OK
 
   shift 3
-  if [ ! -z "$transformer" ]; then
+  if [ -x "$transformer" ]; then
     # or below
     # if [[ ! -z $transformer ]]; then
-    echo "[shift-extension] terget files: $*"
+    printf "${green}[shift-extension] ${cyan}terget files: $*\n"
     for f in $*; do
       if [[ $f =~ $re_origin_ext ]]; then
         local after=$(echo $f | sed -E $re_oring2after)
@@ -43,10 +43,12 @@ _EOT_
       # [[ $f =~ $re_origin_ext ]] && echo $(echo $f | sed -E $re_oring2after)
     done
   else
+    # ${yellow}yellow$reset
+    printf "${red}[shift-extension:DEBUG] ${yellow}terget files: $*\n"green
     for f in $*; do
       if [[ $f =~ $re_origin_ext ]]; then
         local after=$(echo $f | sed -E $re_oring2after)
-        echo "$f $after"
+        printf "${yellow}$f $after\n"
       fi
     done
   fi

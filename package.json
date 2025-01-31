@@ -54,10 +54,10 @@
     "fire:tool": "bash scripts/tool.sh",
     "ic": "rimraf -g yarn.lock node_modules && yarn install",
     "up": "yarn upgrade-interactive --latest",
-    "lint": "bash -c \"ESLINT_USE_FLAT_CONFIG=false npx eslint src/**/*.ts\"",
+    "lint": "bash -c 'ESLINT_USE_FLAT_CONFIG=false npx eslint src/**/*.ts'",
     "v:tag": "yarn fire:tool patch_with_tag",
     "pretest": "rimraf -g ./coverage/*",
-    "test": "bash -c \"NODE_OPTIONS=--experimental-vm-modules npx jest --coverage --silent=false -c=jest.config.js\"",
+    "test": "bash -c 'NODE_OPTIONS=--experimental-vm-modules npx jest --coverage --silent=false -c=jest.config.js'",
     "stress:demo": "node ./scripts/stress-test.mjs -x"
   },
   "devDependencies": {
