@@ -14,6 +14,6 @@ export { MiniSemaphore } from "./class";
 export { create } from "./object";
 export { Deque } from "./deque";
 export { restrictor } from "./flow-restrictor";
-export const version = "v1.3.13";
+export const version = "v1.3.14";
 // DEVNOTE: export * as ns Syntax - since ts v3.8
 // export * as restrictor from "./flow-restrictor";
