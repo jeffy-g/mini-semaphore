@@ -2,11 +2,11 @@
 /**
  * arrayMove
  * 
- * @param src
- * @param si source index
- * @param dst
- * @param di dest index
- * @param len move count
+ * @param {unknown[]} src
+ * @param {number} si source index
+ * @param {unknown[]} dst
+ * @param {number} di dest index
+ * @param {number} len move count
  */
 const am = /* istanbul ignore next */(
     src: any[], si: number,
@@ -20,7 +20,7 @@ const am = /* istanbul ignore next */(
 };
 /**
  * pow2AtLeast
- * @param n 
+ * @param {number} n 
  */
 const p2l = (n: number) => {
     n = n >>> 0;
@@ -34,7 +34,7 @@ const p2l = (n: number) => {
 };
 /**
  * getCapacity
- * @param n 
+ * @param {number=} n 
  */
 const gc = (n?: number) => {
     // @ts-ignore typescript cannot allow (undefined | 0) expression
@@ -46,42 +46,44 @@ const gc = (n?: number) => {
  * 
  * this class is based on https://github.com/petkaantonov/deque/blob/master/js/deque.js  
  * Released under the MIT License: https://github.com/petkaantonov/deque/blob/master/LICENSE
+ * 
+ * @template {any} T
  */
 export class Deque<T extends any> {
 
-    /**
-     * capacity
-     * @type {number}
-     */
     _c: number;
-    /**
-     * current length (size
-     * @type {number}
-     */
     _l: number;
-    /**
-     * current front position
-     * @type {number}
-     */
     _f: number;
-    /**
-     * @type {T[]}
-     */
     _a: T[];
 
     /**
      * default capacity `16`
-     * @param ic initial capacity
+     * @param {number=} ic initial capacity
      */
     constructor(ic?: number) {
+        /**
+         * capacity
+         * @type {number}
+         */
         this._c = gc(ic);
+        /**
+         * current length (size
+         * @type {number}
+         */
         this._l = 0;
+        /**
+         * current front position
+         * @type {number}
+         */
         this._f = 0;
+        /**
+         * @type {T[]}
+         */
         this._a = [];
     }
 
     /**
-     * @param s subject
+     * @param {T} s subject
      */
     push(s: T): void {
         const l = this._l;
@@ -120,7 +122,7 @@ export class Deque<T extends any> {
         }
         const f = this._f;
         const r = this._a[f];
-        this._a[f] = void 0 as unknown as T;
+        this._a[f] = /** @type {T} */(void 0) as T;
         this._f = (f + 1) & (this._c - 1);
         this._l = l - 1;
 
@@ -164,7 +166,9 @@ export class Deque<T extends any> {
 /**
  * resize to
  * 
- * @param n expected capacity
+ * @template {any} T
+ * @param {Deque<T>} dis
+ * @param {number} n expected capacity
  */
 const rt = <T>(dis: Deque<T>, n: number) => {
     // old capacity

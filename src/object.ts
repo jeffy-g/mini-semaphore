@@ -40,7 +40,7 @@ const r = core.release;
  * @version 1.0
  */
 export const create = (capacity: number) => {
-    return {
+    return /** @satisfies {core.TFlowableLock} */({
         capacity,
         limit: capacity,
         q: new Deque(capacity),
@@ -78,5 +78,5 @@ export const create = (capacity: number) => {
                 r(this);
             }
         }
-    } as core.TFlowableLock as core.IFlowableLock;
+    }) satisfies core.TFlowableLock;
 };

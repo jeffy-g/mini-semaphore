@@ -27,7 +27,7 @@ export interface ISimplifiedLock {
     /**
      *  acquire the process rights
      * 
-     * @param lazy Whether the privilege acquisition process is deffer. default `true`
+     * @param {boolean} lazy Whether the privilege acquisition process is deffer. default `true`
      */
     acquire(lazy?: boolean): Promise<void>;
     /**
@@ -46,10 +46,12 @@ export interface ISimplifiedLock {
     readonly pending: number;
     /**
      * limitation
+     * @type {number}
      */
     limit: number;
     /**
      * capacity
+     * @type {number}
      */
     capacity: number;
 }
@@ -79,22 +81,11 @@ export type TFlowableLock<T = TVoidFunction> = IFlowableLock & {
 export type TVoidFunction = () => void;
 
 /**
- * @typedef ISimplifiedLock
- * @prop {(lazy?: boolean) => Promise<void>} acquire acquire the process rights  
- *   &#64;param lazy Whether the privilege acquisition process is deffer. default `true`
- * @prop {() => void} release release the pending of one
- * @prop {(restriction: number) => void} setRestriction Change sharing restrictions to the value of `restriction`  
- *   &#64;param {number} restriction
- * @prop {number} pending Get the number of currently pending processes&#64;type {number}
- * @prop {number} limit limitation
- * @prop {number} capacity capacity
- */
-/**
- * @typedef {<T>(f: () => Promise<T>, lazy?: boolean) => Promise<T>} TFlow
- * @typedef {ISimplifiedLock & { flow: TFlow }} IFlowableLock
- * @typedef {() => void} TVoidFunction
- * @typedef {import("./deque").Deque} Deque
- * @typedef {IFlowableLock & { readonly q: Deque }} TFlowableLock
+ * @typedef {import("./index").Deque} Deque
+ * @typedef {import("./index").TVoidFunction} TVoidFunction
+ * @typedef {import("./index").ISimplifiedLock} ISimplifiedLock
+ * @typedef {import("./index").TFlowableLock} TFlowableLock
+ * @typedef {import("./index").IFlowableLock} IFlowableLock
  */
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -

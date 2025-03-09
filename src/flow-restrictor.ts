@@ -26,11 +26,13 @@ import {
  * @internal
  * @date 2020/6/18
  */
-interface IFlowableLockWithTimeStamp extends IFlowableLock {
+type TFlowableLockWithTimeStamp = IFlowableLock & {
     last?: number;
-}
+};
 type TLockRecordKey = string | number;
+
 /**
+ * @typedef {import("./index").IFlowableLock & { last?: number }} TFlowableLockWithTimeStamp
  * @typedef {string | number} TLockRecordKey
  */
 
@@ -49,9 +51,9 @@ export namespace restrictor {
      */
     const internalLock = new MS(1);
     /**
-     *
+     * @type {Record<TLockRecordKey, TFlowableLockWithTimeStamp>}
      */
-    let locks: Record<TLockRecordKey, IFlowableLockWithTimeStamp> = Object.create(null);
+    let locks: Record<TLockRecordKey, TFlowableLockWithTimeStamp> = Object.create(null);
     /**
      * 
      * @param {TLockRecordKey} key 
@@ -113,11 +115,13 @@ export namespace restrictor {
         const newLocks: typeof locks = Object.create(null);
         const keys = Object.keys(currentLocks);
         let eliminatedCount = 0;
+        /** @type {string[]} */
         let eliminatedKeys: string[];
 
         !timeSpan && /* istanbul ignore next */(timeSpan = 1); // avoid implicit bug
         timeSpan *= 1000;
         if (debug) {
+            // @ts-ignore
             eliminatedKeys = [];
         }
 
@@ -127,6 +131,7 @@ export namespace restrictor {
             if (s.last && Date.now() - s.last >= timeSpan) {
                 eliminatedCount++;
                 if (debug) {
+                    // @ts-ignore
                     eliminatedKeys!.push(key);
                 }
                 continue;
@@ -142,6 +147,7 @@ export namespace restrictor {
 
         if (debug) {
             console.log(
+                // @ts-ignore
                 `eliminated: [\n${eliminatedKeys!.join(",\n")}\n]` +
                 "\n" +
                 `lived: [\n${Object.keys(newLocks).join(",\n")}\n]`

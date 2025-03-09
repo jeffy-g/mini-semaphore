@@ -33,8 +33,8 @@ export declare class Deque<T extends any> {
      * @param s subject
      */
     push(s: T): void;
-    // shift(): T | undefined;
-    clear(): void;
+    shift(): T | undefined;
+    // clear(): void;
     get length(): number;
 }
 

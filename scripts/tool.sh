@@ -86,6 +86,8 @@ webpack() {
 make_mjs() {
   jstool -cmd "cjbm" -basePath "./dist/esm" -ext "mjs"
   fire_shift_ext js mjs js
+  # "./index" to "./index.mjs"
+  sed -i -E 's/"(\.\/index)"/"\1.mjs"/' ./dist/esm/*.mjs
   return $?
 }
 

@@ -32,7 +32,6 @@ export {
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 const a = core.acquire;
 const r = core.release;
-// const f = core.flow;
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 //                       class or namespace exports.
@@ -82,16 +81,20 @@ export class MiniSemaphore implements core.TFlowableLock {
     /**
      * constructs a semaphore instance limited at `capacity`
      * 
-     * @param capacity limitation of concurrent async by `capacity`
+     * @param {number} capacity limitation of concurrent async by `capacity`
      */
     constructor(capacity: number) {
+        /** @type {number} */
         this.limit = this.capacity = capacity;
+        /** @type {Deque<() => void>} */
         this.q = new Deque(capacity);
     }
     /**
      * If there is enough capacity, execute the `resolve` immediately
      * 
      * If not, put it in a queue and wait for the currently pending process to execute `release`
+     * 
+     * @param {boolean=} lazy
      */
     acquire(lazy?: boolean): Promise<void> {
         return a(this, lazy);
@@ -99,6 +102,9 @@ export class MiniSemaphore implements core.TFlowableLock {
     release() {
         r(this);
     }
+    /**
+     * @param {number} restriction
+     */
     setRestriction(restriction: number) {
         this.limit = this.capacity = restriction;
     }
