@@ -13,6 +13,10 @@
 A lightweight version of `Semaphore` that limits the number of process that can simultaneously access a resource or pool of resources.  
 This implementation can only work within one javascript runtime thead and realized by `Promise`
 
+> ## API
+
+  + [mini-semaphore API](./mini-semaphore-api.md)
+
 > ## Usage
 
   + how to imports
