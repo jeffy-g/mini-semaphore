@@ -13,7 +13,7 @@
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 //                                imports.
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-import { Deque } from "./deque";
+import type { Deque } from "./deque";
 import { THROW } from "./extras";
 
 

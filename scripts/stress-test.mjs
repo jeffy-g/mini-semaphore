@@ -44,9 +44,15 @@ const DEFAULT_CONTEXT = {
 
 /** @type {(ms: number) => Promise<void>} */
 const delay = (ms) => new Promise(r => setTimeout(r, ms));
+/* ctt
 const rndDelayTime = (low = 10, limit = 1000) => {
     return (Math.random() * limit + low) | 0;
 };
+/*/
+const rndDelayTime = (low = 10, limit = 170) => {
+    return Math.max(Math.random() * limit | 0, low);
+};
+//*/
 
 
 /**
@@ -61,13 +67,13 @@ export async function stressTest(s, context, cb) {
     /** @type {number} */
     let accIndex;
     const msgEmitter = () => {
-        return `Stress test | executed task: ${(counter + "").padStart(3)}, pending task: ${(s.pending + "").padEnd(5)}`;
+        return `Stress test | executed task: ${String(counter).padStart(3)}, pending task: ${String(s.pending).padEnd(5)}`;
     };
     const EXPLAIN = `\n\nAfter waiting between ${context.minDelay} and ${context.maxDelay}ms, increment the element of \`toucher\` and observe how it is accessed.`;
 
     const restriction = s.limit;
     const promises = [];
-    const toucher = Array(restriction).fill(0);
+    const accessCounts = Array(restriction).fill(0);
     const progress = tinyProgress.create(30, msgEmitter);
 
     counter = accIndex = 0;
@@ -76,11 +82,11 @@ export async function stressTest(s, context, cb) {
         promises[counter++] = s.flow(async () => {
             await delay(rndDelayTime(context.minDelay, context.maxDelay));
             // DEVNOTE: 2025/5/10
-            // Increment the count for the current index in the `toucher` array.
+            // Increment the count for the current index in the `accessCounts` array.
             // The index is determined using a modulo operation to ensure it wraps around
             // within the bounds of the `restriction` value. This simulates access to a
             // limited number of resources in a round-robin fashion.
-            toucher[accIndex++ % restriction]++;
+            accessCounts[accIndex++ % restriction]++;
         }, false);
         progress.renderAsync();
         await delay(1);
@@ -92,8 +98,8 @@ export async function stressTest(s, context, cb) {
     progress.stop();
     progress.deadline();
 
-    const total = toucher.reduce((sum, element) => sum + element, 0);
-    console.log(`${EXPLAIN}\n[${toucher}] => total: ${total}`);
+    const total = accessCounts.reduce((sum, element) => sum + element, 0);
+    console.log(`${EXPLAIN}\n[${accessCounts}] => total: ${total}`);
 
     cb && cb(s, total);
 }

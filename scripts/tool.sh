@@ -101,7 +101,7 @@ fire_shift_ext() {
 if [ ! -z $1 ]; then
   fname=$1
   shift
-  $fname $*
+  $fname "$@"
 else
   echo "[${0}]: no parameters..."
 fi

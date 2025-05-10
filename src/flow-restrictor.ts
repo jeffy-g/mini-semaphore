@@ -14,7 +14,7 @@
 //                                imports.
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 import * as c from "./class";
-import {
+import type {
     IFlowableLock
 } from "./class";
 
@@ -29,11 +29,9 @@ import {
 type TFlowableLockWithTimeStamp = IFlowableLock & {
     last?: number;
 };
-type TLockRecordKey = string | number;
 
 /**
  * @typedef {import("./index").IFlowableLock & { last?: number }} TFlowableLockWithTimeStamp
- * @typedef {string | number} TLockRecordKey
  */
 
 
@@ -51,16 +49,16 @@ export const restrictor = (() => {
      */
     const internalLock = new MS(1);
     /**
-     * @type {Record<TLockRecordKey, TFlowableLockWithTimeStamp>}
+     * @type {Record<PropertyKey, TFlowableLockWithTimeStamp>}
      */
-    let locks: Record<TLockRecordKey, TFlowableLockWithTimeStamp> = Object.create(null);
+    let locks: Record<PropertyKey, TFlowableLockWithTimeStamp> = Object.create(null);
     /**
      * 
-     * @param {TLockRecordKey} key 
+     * @param {PropertyKey} key 
      * @param {number} restriction 
      * @throws when different restriction
      */
-    const get = async (key: TLockRecordKey, restriction: number) => {
+    const get = async (key: PropertyKey, restriction: number) => {
         // acquire internal lock
         await internalLock.acquire(false);
 
@@ -72,7 +70,7 @@ export const restrictor = (() => {
             // release internal lock
             internalLock.release();
             throw new ReferenceError(
-                `Cannot get object with different restriction: key: '${key}', lock.limit: ${lock.limit} <-> restriction: ${restriction},`
+                `Cannot get object with different restriction: key: '${String(key)}', lock.limit: ${lock.limit} <-> restriction: ${restriction},`
             );
         }
 
@@ -86,10 +84,10 @@ export const restrictor = (() => {
      * 
      *   + ⚠️ The object to be retrieved with `key` must already be created with `multi` ore `one`
      * 
-     * @param {TLockRecordKey} key 
+     * @param {PropertyKey} key 
      * @returns `IFlowableLock` instance or `undefined`
      */
-    const getLockByKey = async (key: TLockRecordKey) => {
+    const getLockByKey = async (key: PropertyKey) => {
         // acquire internal lock
         await internalLock.acquire(false);
         const l = locks[key];
@@ -160,11 +158,11 @@ export const restrictor = (() => {
      * Allocate a semaphore for each `key`, and limit the number of shares with the value of `restriction`
      * 
      * @template {any} T
-     * @param {TLockRecordKey} key number or string as tag
+     * @param {PropertyKey} key number or string as tag
      * @param {number} restriction number of process restriction
      * @param {() => Promise<T>} pb the process body
      */
-    async function multi<T>(key: TLockRecordKey, restriction: number, pb: () => Promise<T>) {
+    async function multi<T>(key: PropertyKey, restriction: number, pb: () => Promise<T>) {
         const s = await get(key, restriction);
         const result = s.flow(pb);
         s.last = Date.now();
@@ -177,10 +175,10 @@ export const restrictor = (() => {
      *    * Avoid concurrent requests to the same url
      * 
      * @template {any} T
-     * @param {TLockRecordKey} key number or string as tag
+     * @param {PropertyKey} key number or string as tag
      * @param {() => Promise<T>} pb the process body
      */
-    async function one<T>(key: TLockRecordKey, pb: () => Promise<T>) {
+    async function one<T>(key: PropertyKey, pb: () => Promise<T>) {
         return multi(key, 1, pb);
     }
 
