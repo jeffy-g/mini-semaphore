@@ -9,28 +9,21 @@ import stylistic from "@stylistic/eslint-plugin";
  * npx eslint --inspect-config
  *  - https://ma-vericks.com/blog/eslint-flat-config/
  */
-// const ignoreConfig = {
-//   ignores: [
-//     "dist/*",
-//     "coverage/*",
-//     "build/*",
-//     "scripts/*",
-//     "__tests__/*",
-//   ]
-// };
+const ignoreConfig = {
+  ignores: [
+    "dist/**/*",
+    "coverage/**/*",
+    "build/**/*",
+    "scripts/**/*",
+    "__tests__/*",
+  ]
+};
 
 // https://typescript-eslint.io/play
 export default tsesconfig.config(
-  // export default [{
-  // ignoreConfig,
+  ignoreConfig,
   {
-    ignores: [
-      "dist/*",
-      "coverage/*",
-      "build/*",
-      "scripts/*",
-      "__tests__/*",
-    ],
+    ignores: ignoreConfig.ignores,
     files: ["src/**/*.ts"],
     languageOptions: {
       // // The env option has been removed, globals is used instead.
@@ -61,9 +54,9 @@ export default tsesconfig.config(
       "@stylistic": stylistic,
     },
     rules: {
-      // "@tseslintPlugin/array-type": ["warn", {
-      //   default: "array-simple"
-      // }],
+      "@tseslintPlugin/array-type": ["warn", {
+        default: "array-simple"
+      }],
       "@stylistic/indent": ["warn", 4, {
         SwitchCase: 1
       }],
