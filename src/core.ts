@@ -81,8 +81,8 @@ export type TFlowableLock<T = TVoidFunction> = IFlowableLock & {
 export type TVoidFunction = () => void;
 
 /**
- * @typedef {import("./index").Deque} Deque
  * @typedef {import("./index").TVoidFunction} TVoidFunction
+ * @typedef {import("./index").Deque<TVoidFunction>} Deque
  * @typedef {import("./index").ISimplifiedLock} ISimplifiedLock
  * @typedef {import("./index").TFlowableLock} TFlowableLock
  * @typedef {import("./index").IFlowableLock} IFlowableLock
@@ -111,7 +111,6 @@ const box = (z: TFlowableLock, r: TVoidFunction) => {
  * @returns {Promise<void>}
  */
 export const acquire = (dis: TFlowableLock, lazy = true) => {
-    // return !lazy? aqtight(dis): aqlazy(dis);
     return new Promise<void>(r => {
         // DEVNOTE: Deque object resize event is less likely to occur if overdue by timeout
         //   - however, this is not the case if the process takes hundreds of ms
@@ -128,9 +127,11 @@ export const acquire = (dis: TFlowableLock, lazy = true) => {
  * @returns {void}
  */
 export const release = (dis: TFlowableLock) => {
-    if (dis.q.length) {
+    /** @type {Deque} */
+    let dq: Deque<TVoidFunction>;
+    if ((dq = dis.q).length) {
         // DEVNOTE: Will never reach `THROW`
-        (dis.q.shift() || /* istanbul ignore next */THROW)();
+        (dq.shift() || /* istanbul ignore next */THROW)();
     } else {
         dis.capacity++;
     }

@@ -15,16 +15,9 @@
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 import * as core from "./core";
 import { Deque } from "./deque";
-export {
+export type {
     TVoidFunction, IFlowableLock, ISimplifiedLock,
 } from "./core";
-// DEVNOTE: export * as ns Syntax - since ts v3.8
-// import type {
-//     TVoidFunction, TFlowableLock
-// } from "./core";
-// export type {
-//     TVoidFunction, IFlowableLock, ISimplifiedLock,
-// } from "./core";
 
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -119,15 +112,11 @@ export class MiniSemaphore implements core.TFlowableLock {
      * @param {boolean=} lazy
      */
     async flow<T>(process: () => Promise<T>, lazy?: boolean): Promise<T> {
-        // return f(this, process, lazy);
         await a(this, lazy);
         try {
             return await process();
         } finally {
             r(this);
         }
-        // return this.acquire().then(async () => {
-        //     return await process().then(result => result).finally(() => this.release());
-        // });
     }
 }

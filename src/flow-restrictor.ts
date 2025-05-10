@@ -43,7 +43,7 @@ type TLockRecordKey = string | number;
 /**
  * Flow Restriction
  */
-export namespace restrictor {
+export const restrictor = (() => {
 
     const { MiniSemaphore: MS } = c;
     /**
@@ -89,7 +89,7 @@ export namespace restrictor {
      * @param {TLockRecordKey} key 
      * @returns `IFlowableLock` instance or `undefined`
      */
-    export const getLockByKey = async (key: TLockRecordKey) => {
+    const getLockByKey = async (key: TLockRecordKey) => {
         // acquire internal lock
         await internalLock.acquire(false);
         const l = locks[key];
@@ -106,7 +106,7 @@ export namespace restrictor {
      * @returns {Promise<number>} eliminated count
      * @date 2020/6/19
      */
-    export const cleanup = async (timeSpan: number, debug?: true): Promise<number> => {
+    const cleanup = async (timeSpan: number, debug?: true): Promise<number> => {
 
         // acquire internal lock
         await internalLock.acquire(false);
@@ -121,7 +121,6 @@ export namespace restrictor {
         !timeSpan && /* istanbul ignore next */(timeSpan = 1); // avoid implicit bug
         timeSpan *= 1000;
         if (debug) {
-            // @ts-ignore
             eliminatedKeys = [];
         }
 
@@ -165,7 +164,7 @@ export namespace restrictor {
      * @param {number} restriction number of process restriction
      * @param {() => Promise<T>} pb the process body
      */
-    export async function multi<T>(key: TLockRecordKey, restriction: number, pb: () => Promise<T>) {
+    async function multi<T>(key: TLockRecordKey, restriction: number, pb: () => Promise<T>) {
         const s = await get(key, restriction);
         const result = s.flow(pb);
         s.last = Date.now();
@@ -181,7 +180,11 @@ export namespace restrictor {
      * @param {TLockRecordKey} key number or string as tag
      * @param {() => Promise<T>} pb the process body
      */
-    export async function one<T>(key: TLockRecordKey, pb: () => Promise<T>) {
+    async function one<T>(key: TLockRecordKey, pb: () => Promise<T>) {
         return multi(key, 1, pb);
     }
-}
+
+    return {
+        getLockByKey, cleanup, multi, one
+    };
+})();

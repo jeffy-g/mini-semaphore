@@ -14,16 +14,20 @@ import type { create as FNcreate } from "../src/";
 
 const stressContext: TStressContext = {
   max: 500,
-  wait_high: 200,
-  wait_low: 5
+  maxDelay: 170,
+  minDelay: 5
 };
 
-eachModule("../src/");
-eachModule("../dist/");
-eachModule("../dist/umd/");
-eachModule("../dist/webpack/");
-eachModule("../dist/esm/index.mjs");
-eachModule("../dist/webpack-esm/index.mjs");
+const moduleIds = [
+  "../src/",
+  "../dist/",
+  "../dist/umd/",
+  "../dist/webpack/",
+  "../dist/esm/index.mjs",
+  "../dist/webpack-esm/index.mjs",
+];
+moduleIds.forEach(eachModule);
+
 
 function eachModule(path: string) {
 

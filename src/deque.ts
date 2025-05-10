@@ -8,7 +8,8 @@
  * @param {number} di dest index
  * @param {number} len move count
  */
-const am = /* istanbul ignore next */(
+/* istanbul ignore next */
+const am = (
     src: any[], si: number,
     dst: any[], di: number,
     len: number

@@ -5,7 +5,6 @@
   https://opensource.org/licenses/mit-license.php
  - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 */
-
 export type {
     TVoidFunction,
     IFlowableLock, ISimplifiedLock, TFlowableLock
@@ -15,5 +14,3 @@ export { create } from "./object";
 export { Deque } from "./deque";
 export { restrictor } from "./flow-restrictor";
 export const version = "v1.3.14";
-// DEVNOTE: export * as ns Syntax - since ts v3.8
-// export * as restrictor from "./flow-restrictor";

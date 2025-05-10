@@ -11,19 +11,35 @@ import tinargs from "tin-args";
 
 
 /**
- * @typedef {ReturnType<typeof semaphore.create>} IFlow ok
- * @typedef {object} TStressContext stress test parameters
+ * @typedef {ReturnType<typeof semaphore.create>} IFlow
+ * @typedef TStressContext stress test parameters
  * @prop {number} max task count
- * @prop {number} wait_low wait low value
- * @prop {number} wait_high wait high value
+ * @prop {number} maxDelay wait high value
+ * @prop {number} minDelay wait low value
  */
 
-const RESTRICT = 10;
-/** @type {TStressContext} */
+const MAX_CONCURRENT_TASKS = 10;
+/**
+ * Default configuration context for the `stressTest`.
+ * 
+ * @type {TStressContext}
+ */
 const DEFAULT_CONTEXT = {
+    /** 
+     * The maximum value used within the `stressTest`. 
+     * This can represent various limits depending on the scenario.
+     */
     max: 1_000,
-    wait_high: 200,
-    wait_low: 5
+    /** 
+     * The maximum delay time in milliseconds. 
+     * Indicates the longest time the task should wait.
+     */
+    maxDelay: 170,
+    /** 
+     * The minimum delay time in milliseconds. 
+     * Indicates the shortest time the task  should wait.
+     */
+    minDelay: 5
 };
 
 /** @type {(ms: number) => Promise<void>} */
@@ -47,7 +63,7 @@ export async function stressTest(s, context, cb) {
     const msgEmitter = () => {
         return `Stress test | executed task: ${(counter + "").padStart(3)}, pending task: ${(s.pending + "").padEnd(5)}`;
     };
-    const EXPLAIN = `After waiting between ${context.wait_low} and ${context.wait_high}ms, increment the element of \`toucher\` and observe how it is accessed.`;
+    const EXPLAIN = `\n\nAfter waiting between ${context.minDelay} and ${context.maxDelay}ms, increment the element of \`toucher\` and observe how it is accessed.`;
 
     const restriction = s.limit;
     const promises = [];
@@ -56,18 +72,21 @@ export async function stressTest(s, context, cb) {
 
     counter = accIndex = 0;
     progress.newLine();
-    // progress.run();
     for (; counter < context.max;) {
         promises[counter++] = s.flow(async () => {
-            await delay(rndDelayTime(context.wait_low, context.wait_high));
-            // DEVNOTE: 2024/12/10 - 
-            //   
+            await delay(rndDelayTime(context.minDelay, context.maxDelay));
+            // DEVNOTE: 2025/5/10
+            // Increment the count for the current index in the `toucher` array.
+            // The index is determined using a modulo operation to ensure it wraps around
+            // within the bounds of the `restriction` value. This simulates access to a
+            // limited number of resources in a round-robin fashion.
             toucher[accIndex++ % restriction]++;
         }, false);
         progress.renderAsync();
         await delay(1);
     }
 
+    progress.run();
     await Promise.all(promises);
 
     progress.stop();
@@ -82,6 +101,6 @@ export async function stressTest(s, context, cb) {
 if (tinargs().x) {
     // node ./scripts/stress-test.mjs -x
     stressTest(
-        semaphore.create(RESTRICT), DEFAULT_CONTEXT
+        semaphore.create(MAX_CONCURRENT_TASKS), DEFAULT_CONTEXT
     );
 }
