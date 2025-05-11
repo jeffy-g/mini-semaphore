@@ -13,4 +13,4 @@ export { MiniSemaphore } from "./class";
 export { create } from "./object";
 export { Deque } from "./deque";
 export { restrictor } from "./flow-restrictor";
-export const version = "v1.3.15";
+export const version = "v1.3.16";
