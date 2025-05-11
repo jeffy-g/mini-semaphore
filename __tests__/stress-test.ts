@@ -7,6 +7,7 @@
 */
 // @ts-ignore avoid ts-jest semantic error
 import { stressTest } from "../scripts/stress-test.mjs";
+import { moduleIds } from "./constants";
 // @ts-ignore avoid ts-jest semantic error
 import type { TStressContext } from "../scripts/stress-test.mjs";
 import type { create as FNcreate } from "../src/";
@@ -18,14 +19,6 @@ const stressContext: TStressContext = {
   minDelay: 5
 };
 
-const moduleIds = [
-  "../src/",
-  "../dist/",
-  "../dist/umd/",
-  "../dist/webpack/",
-  "../dist/esm/index.mjs",
-  "../dist/webpack-esm/index.mjs",
-];
 moduleIds.forEach(eachModule);
 
 

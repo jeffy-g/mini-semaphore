@@ -1,6 +1,7 @@
 import assert from "assert";
 import { performance } from "perf_hooks";
 import fetch from "node-fetch";
+import { moduleIds } from "./constants";
 
 import type {
   TFlowableLock,
@@ -66,13 +67,7 @@ const basicTest = async (s: TFlowableLock, lazy: boolean) => {
   assert.equal(ran, 5);
 };
 
-eachModule("../src/");
-eachModule("../dist/");
-eachModule("../dist/umd/");
-eachModule("../dist/webpack/");
-eachModule("../dist/esm/index.mjs");
-eachModule("../dist/webpack-esm/index.mjs");
-
+moduleIds.forEach(eachModule);
 function eachModule(path: string) {
 
   let MiniSemaphore: typeof CMiniSemaphore,

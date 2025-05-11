@@ -69,7 +69,7 @@ export async function stressTest(s, context, cb) {
     const msgEmitter = () => {
         return `Stress test | executed task: ${String(counter).padStart(3)}, pending task: ${String(s.pending).padEnd(5)}`;
     };
-    const EXPLAIN = `\n\nAfter waiting between ${context.minDelay} and ${context.maxDelay}ms, increment the element of \`toucher\` and observe how it is accessed.`;
+    const EXPLAIN = `\n\nAfter waiting between ${context.minDelay} and ${context.maxDelay}ms, increment the element of \`accessCounts\` and observe how it is accessed.`;
 
     const restriction = s.limit;
     const promises = [];
