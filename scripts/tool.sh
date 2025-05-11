@@ -36,7 +36,7 @@ patch_with_tag() {
   local after=$(echo $ret | sed -E 's/.*version updated: ([0-9]+\.[0-9]+\.[0-9]+(-\w+)?).*/\1/');
   echo version=[$after];
   git add -u;
-  git commit -m v$after;
+  git commit -m "chore: bump version to v$after";
   git tag v$after
 }
 
