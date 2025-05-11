@@ -14,7 +14,6 @@
 //                                imports.
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 import type { Deque } from "./deque";
-import { THROW } from "./extras";
 
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -91,6 +90,13 @@ export type TVoidFunction = () => void;
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 //                       class or namespace exports.
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+/**
+ * Throws an error indicating an inconsistent state in mini-semaphore.
+ */
+const THROW = /* istanbul ignore next */() => {
+    throw new Error("mini-semaphore: Detected an inconsistent state, possibly due to a logic error or unexpected behavior.");
+};
+
 /**
  * 
  * @param {TFlowableLock} z 
