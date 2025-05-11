@@ -15,8 +15,8 @@ import type { create as FNcreate } from "../src/";
 
 const stressContext: TStressContext = {
   max: 500,
-  maxDelay: 170,
-  minDelay: 5
+  maxDelay: 220,
+  minDelay: 20
 };
 
 moduleIds.forEach(eachModule);

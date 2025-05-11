@@ -25,27 +25,29 @@ const am = (
  */
 const p2l = (n: number) => {
     n = n >>> 0;
-    n = n - 1;
-    n = n | (n >> 1);
-    n = n | (n >> 2);
-    n = n | (n >> 4);
-    n = n | (n >> 8);
-    n = n | (n >> 16);
+    n--;
+    n |= n >> 1;
+    n |= n >> 2;
+    n |= n >> 4;
+    n |= n >> 8;
+    n |= n >> 16;
     return n + 1;
 };
 /**
  * getCapacity
- * @param {number=} n 
+ * @param {number} n 
  */
-const gc = (n?: number) => {
-    // @ts-ignore typescript cannot allow (undefined | 0) expression
+const gc = (n: number) => {
     return p2l(Math.min(Math.max(16, n | 0), 1073741824));
 };
 
 /**
  * ### Implementation restricted to FIFO
  * 
- * this class is based on https://github.com/petkaantonov/deque/blob/master/js/deque.js  
+ * This class uses a ring buffer for efficient FIFO operations.  
+ * The maximum buffer size is **`1073741824`**.
+ * 
+ * This class is based on https://github.com/petkaantonov/deque/blob/master/js/deque.js  
  * Released under the MIT License: https://github.com/petkaantonov/deque/blob/master/LICENSE
  * 
  * @template {any} T
@@ -55,6 +57,7 @@ export class Deque<T extends any> {
     _c: number;
     _l: number;
     _f: number;
+    length: number;
     _a: T[];
 
     /**
@@ -64,19 +67,21 @@ export class Deque<T extends any> {
     constructor(ic?: number) {
         /**
          * capacity
-         * @type {number}
          */
-        this._c = gc(ic);
+        this._c = gc(ic || 16);
         /**
          * current length (size
-         * @type {number}
          */
         this._l = 0;
         /**
          * current front position
-         * @type {number}
          */
         this._f = 0;
+
+        /**
+         * 
+         */
+        this.length = 0;
         /**
          * @type {T[]}
          */
@@ -98,19 +103,19 @@ export class Deque<T extends any> {
         //*/
         const i = (this._f + l) & (this._c - 1);
         this._a[i] = s;
-        this._l = l + 1;
+        this.length = this._l = l + 1;
         // return l + 1;
     }
 
     // pop() {
-    //     const length = this._length;
-    //     if (length === 0) {
+    //     const l = this._l;
+    //     if (l === 0) {
     //         return void 0;
     //     }
-    //     const i = (this._front + length - 1) & (this._capacity - 1);
-    //     const ret = this.arr[i];
-    //     this.arr[i] = void 0;
-    //     this._length = length - 1;
+    //     const i = (this._f + l - 1) & (this._c - 1);
+    //     const ret = this.a[i];
+    //     this.a[i] = void 0;
+    //     this.length = this._l = l - 1;
 
     //     return ret;
     // }
@@ -125,7 +130,7 @@ export class Deque<T extends any> {
         const r = this._a[f];
         this._a[f] = /** @type {T} */(void 0) as T;
         this._f = (f + 1) & (this._c - 1);
-        this._l = l - 1;
+        this.length = this._l = l - 1;
 
         return r;
     }
@@ -140,13 +145,13 @@ export class Deque<T extends any> {
     //     for (let j = 0; j < l; ++j) {
     //         a[(f + j) & (c - 1)] = void 0 as unknown as T;
     //     }
-    //     this._l = 0;
     //     this._f = 0;
+    //     this.length = this._l = 0;
     // }
 
-    get length(): number {
-        return this._l;
-    }
+    // get length(): number {
+    //     return this._l;
+    // }
 }
 
 // export namespace Deque {

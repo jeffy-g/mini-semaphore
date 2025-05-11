@@ -34,12 +34,12 @@ const DEFAULT_CONTEXT = {
      * The maximum delay time in milliseconds. 
      * Indicates the longest time the task should wait.
      */
-    maxDelay: 170,
+    maxDelay: 250,
     /** 
      * The minimum delay time in milliseconds. 
      * Indicates the shortest time the task  should wait.
      */
-    minDelay: 5
+    minDelay: 10
 };
 
 /** @type {(ms: number) => Promise<void>} */

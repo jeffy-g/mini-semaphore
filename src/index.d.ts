@@ -35,7 +35,7 @@ export declare class Deque<T extends any> {
     push(s: T): void;
     shift(): T | undefined;
     // clear(): void;
-    get length(): number;
+    readonly length: number;
 }
 
 /**
