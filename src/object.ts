@@ -31,6 +31,37 @@ const ra = core.releaseWithAbort;
 //                       class or namespace exports.
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 /**
+ * @template {core.IFlowableLock & { q: Deque<unknown>}} T
+ * @param {number} capacity
+ * @returns 
+ */
+const createBase = <T extends core.IFlowableLock & { q: Deque<unknown>}>(capacity: number) => {
+    return /** @type {T} */({
+        capacity,
+        limit: capacity,
+        q: new Deque(capacity),
+        /**
+         * @param {number} restriction
+         */
+        setRestriction(restriction: number) {
+            this.limit = this.capacity = restriction;
+        },
+        // DEVNOTE: 2025/5/12
+        // The `get pending()` accessor was removed from `createBase` to resolve an issue
+        // where the `this` context in the accessor was incorrectly bound after spreading
+        // the `createBase` object into the final semaphore object. This caused `this.q`
+        // to be undefined or reference the wrong object, leading to unexpected behavior
+        // in the `pending` property.
+        //
+        // By excluding `get pending()` from `createBase` and defining it directly in the
+        // final object, the `this` context is correctly bound to the intended semaphore
+        // instance. This ensures that `this.q` references the correct `Deque` instance.
+        // get pending() {
+        //     return this.q.length;
+        // },
+    }) as T;
+};
+/**
  * object implementation of `IFlowableLock`
  * 
  *   + constructs a semaphore object limited at `capacity`
@@ -40,10 +71,13 @@ const ra = core.releaseWithAbort;
  * @version 1.0
  */
 export const create = (capacity: number) => {
+    /** @type {core.TFlowableLock} */
+    const base: core.TFlowableLock = createBase(capacity);
     return /** @satisfies {core.TFlowableLock} */({
-        capacity,
-        limit: capacity,
-        q: new Deque(capacity),
+        ...base,
+        get pending() {
+            return this.q.length;
+        },
         /**
          * 
          * @param {boolean} [lazy]
@@ -54,15 +88,6 @@ export const create = (capacity: number) => {
         },
         release() {
             r(this);
-        },
-        /**
-         * @param {number} restriction
-         */
-        setRestriction(restriction: number) {
-            this.limit = this.capacity = restriction;
-        },
-        get pending() {
-            return this.q.length;
         },
         /**
          * @template {any} T
@@ -90,10 +115,13 @@ export const create = (capacity: number) => {
  * @version 1.4
  */
 export const createWithAbort = (capacity: number) => {
+    /** @type {core.TFlowableLockWithAbort} */
+    const base: core.TFlowableLockWithAbort = createBase(capacity);
     return /** @satisfies {core.TFlowableLockWithAbort} */({
-        capacity,
-        limit: capacity,
-        q: new Deque(capacity),
+        ...base,
+        get pending() {
+            return this.q.length;
+        },
         /**
          * @returns {Promise<void>}
          */
@@ -102,15 +130,6 @@ export const createWithAbort = (capacity: number) => {
         },
         release() {
             ra(this);
-        },
-        /**
-         * @param {number} restriction
-         */
-        setRestriction(restriction: number) {
-            this.limit = this.capacity = restriction;
-        },
-        get pending() {
-            return this.q.length;
         },
         /**
          * @template {any} T
