@@ -5,12 +5,9 @@
   https://opensource.org/licenses/mit-license.php
  - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 */
-export type {
-    TVoidFunction,
-    IFlowableLock, ISimplifiedLock, TFlowableLock
-} from "./core";
+export type * from "./core";
 export { MiniSemaphore } from "./class";
-export { create } from "./object";
+export { create, createWithAbort } from "./object";
 export { Deque } from "./deque";
 export { restrictor } from "./flow-restrictor";
 export const version = "v1.3.17";

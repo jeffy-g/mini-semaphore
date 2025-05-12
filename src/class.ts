@@ -15,9 +15,7 @@
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 import * as core from "./core";
 import { Deque } from "./deque";
-export type {
-    TVoidFunction, IFlowableLock, ISimplifiedLock,
-} from "./core";
+export type * from "./core";
 
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -

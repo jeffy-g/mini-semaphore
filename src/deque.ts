@@ -57,8 +57,9 @@ export class Deque<T extends any> {
     _c: number;
     _l: number;
     _f: number;
-    length: number;
     _a: T[];
+
+    length: number;
 
     /**
      * default capacity `16`
@@ -67,25 +68,29 @@ export class Deque<T extends any> {
     constructor(ic?: number) {
         /**
          * capacity
+         * @internal
          */
         this._c = gc(ic || 16);
         /**
          * current length (size
+         * @internal
          */
         this._l = 0;
         /**
          * current front position
+         * @internal
          */
         this._f = 0;
-
-        /**
-         * 
-         */
-        this.length = 0;
         /**
          * @type {T[]}
+         * @internal
          */
         this._a = [];
+
+        /**
+         * current length (size
+         */
+        this.length = 0;
     }
 
     /**
@@ -175,6 +180,7 @@ export class Deque<T extends any> {
  * @template {any} T
  * @param {Deque<T>} dis
  * @param {number} n expected capacity
+ * @todo test code
  */
 const rt = <T>(dis: Deque<T>, n: number) => {
     // old capacity

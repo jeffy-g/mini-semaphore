@@ -7,23 +7,24 @@
 export declare class Deque<T extends any> {
     /**
      * capacity
-     * @type {number}
+     * @internal
      */
     _c: number;
     /**
      * current length (size
-     * @type {number}
+     * @internal
      */
     _l: number;
     /**
      * current front position
-     * @type {number}
+     * @internal
      */
     _f: number;
     /**
-     * @type {T[]}
+     * @internal
      */
     _a: T[];
+
     /**
      * default capacity `16`
      * @param ic initial capacity
@@ -95,6 +96,14 @@ export declare type TFlowableLock<T = TVoidFunction> = IFlowableLock & {
 };
 export declare type TVoidFunction = () => void;
 
+export declare type TResolver = {
+    resolve: () => void;
+    reject: (reason: any) => void;
+};
+export declare type TFlowableLockWithAbort = IFlowableLock & {
+    readonly q: Deque<TResolver>;
+    abort(): void;
+};
 
 /**
  * #### Mini Semaphore
@@ -160,7 +169,7 @@ export declare class MiniSemaphore implements TFlowableLock {
 }
 
 /**
- * object implementation of `IFlowableLock`
+ * object implementation of `TFlowableLock`
  *
  *   + constructs a semaphore object limited at `capacity`
  *
@@ -168,7 +177,18 @@ export declare class MiniSemaphore implements TFlowableLock {
  * @date 2020/2/7
  * @version 1.0
  */
-export declare const create: (capacity: number) => IFlowableLock;
+export declare const create: (capacity: number) => TFlowableLock;
+/**
+ * object implementation of `TFlowableLockWithAbort`
+ * 
+ *   + constructs a semaphore object limited at `capacity`
+ * 
+ * @param {number} capacity limitation of concurrent async by `capacity`
+ * @date 2025/5/12
+ * @version 1.4
+ */
+export declare const createWithAbort: (capacity: number) => TFlowableLockWithAbort;
+
 
 declare namespace fr {
     /**

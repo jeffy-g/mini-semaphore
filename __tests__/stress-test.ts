@@ -15,7 +15,7 @@ import type { create as FNcreate } from "../src/";
 
 const stressContext: TStressContext = {
   max: 500,
-  maxDelay: 220,
+  maxDelay: 200,
   minDelay: 20
 };
 

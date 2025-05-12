@@ -7,6 +7,7 @@ import type {
   TFlowableLock,
   MiniSemaphore as CMiniSemaphore,
   create as FNcreate,
+  createWithAbort as cwa,
   restrictor as NSrestrictor
 } from "../src/";
 type TSignal = (arg?: any) => void;
@@ -72,12 +73,14 @@ function eachModule(path: string) {
 
   let MiniSemaphore: typeof CMiniSemaphore,
     create: typeof FNcreate,
+    createWithAbort: typeof cwa,
     restrictor: typeof NSrestrictor;
 
   beforeAll(async () => {
     const mod = await import(path);
     ({
-      MiniSemaphore, create, restrictor
+      MiniSemaphore, create, createWithAbort,
+      restrictor
       // DEVNOTE: 2023/11/01 - `cjs` module are wrap to `default`
     } = mod.default || mod);
   });
@@ -305,6 +308,80 @@ function eachModule(path: string) {
         assert(error instanceof ReferenceError);
       });
 
+    });
+
+    describe("mini semaphore with abort", function () {
+      it("handles normal state", async function () {
+        const CAPACITY = 7;
+        const s = createWithAbort(4);
+        s.setRestriction(CAPACITY);
+        let i = 0;
+        const normalTack = async () => {
+          if (i % 2 === 0) {
+            return s.flow(() => delay(WAIT<<1));
+          } else {
+            await s.acquire()
+            await delay(WAIT<<1);
+            s.release();
+          }
+        };
+        const promises: Promise<void>[] = [];
+        for (; i < 20; i++) {
+          promises.push(normalTack());
+        }
+        await Promise.all(promises);
+        assert.equal(s.pending, 0);
+        assert.equal(s.capacity, CAPACITY);
+      });
+
+      it("supports aborting pending tasks", async function () {
+        const s = createWithAbort(2);
+        let running = 0;
+        let ran = 0;
+        let aborted = 0;
+
+        const task = async () => {
+          running++;
+          await delay(WAIT);
+          running--;
+          ran++;
+        };
+
+        let abortReason: any;
+        const abortableTask = async () => {
+          try {
+            await s.acquire();
+            await task();
+            s.release();
+          } catch (e) {
+            abortReason = e;
+            aborted++;
+          }
+        };
+
+        // Start tasks
+        const tasks = [abortableTask(), abortableTask(), abortableTask(), abortableTask()];
+        await delay(WAIT / 2); // Let some tasks start
+
+        // Abort all pending tasks
+        s.abort();
+
+        // Wait for all tasks to complete
+        await Promise.allSettled(tasks);
+
+        // Verify results
+        assert.equal(running, 0);
+        assert.equal(ran, 2); // Only 2 tasks should have run
+        assert.equal(aborted, 2); // 2 tasks should have been aborted
+        assert.equal(s.capacity, 2); // Capacity should be restored
+        assert.equal(abortReason.message, "Process Aborted");
+      });
+
+      it("handles abort without pending tasks gracefully", async function () {
+        const s = createWithAbort(2);
+        s.abort(); // Abort without any pending tasks
+        assert.equal(s.capacity, 2); // Capacity should remain unchanged
+      });
     });
 
     describe("single restriction (mutex", function () {

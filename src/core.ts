@@ -76,12 +76,25 @@ export type TFlowableLock<T = TVoidFunction> = IFlowableLock & {
      */
     readonly q: Deque<T>;
 };
+export type TResolver = {
+    resolve: () => void;
+    reject: (reason: any) => void;
+};
+export type TFlowableLockWithAbort = IFlowableLock & {
+    readonly q: Deque<TResolver>;
+    abort(): void;
+};
+export declare interface IProcessAbortedError {
+    readonly message: "Process Aborted";
+}
 
 export type TVoidFunction = () => void;
 
 /**
  * @typedef {import("./index").TVoidFunction} TVoidFunction
  * @typedef {import("./index").Deque<TVoidFunction>} Deque
+ * @typedef {import("./index").TFlowableLockWithAbort} TFlowableLockWithAbort
+ * @typedef {import("./index").Deque<TResolver>} DequeWithAbort
  * @typedef {import("./index").ISimplifiedLock} ISimplifiedLock
  * @typedef {import("./index").TFlowableLock} TFlowableLock
  * @typedef {import("./index").IFlowableLock} IFlowableLock
@@ -127,7 +140,6 @@ export const acquire = (dis: TFlowableLock, lazy = true) => {
         }
     });
 };
-
 /**
  * @param {TFlowableLock} dis
  * @returns {void}
@@ -138,6 +150,47 @@ export const release = (dis: TFlowableLock) => {
     if ((dq = dis.q).length) {
         // DEVNOTE: Will never reach `THROW`
         (dq.shift() || /* istanbul ignore next */THROW)();
+    } else {
+        dis.capacity++;
+    }
+    if (dis.capacity > dis.limit) {
+        console.warn("inconsistent release!");
+        dis.capacity = dis.limit;
+    }
+};
+
+/**
+ * @param {TFlowableLockWithAbort} dis 
+ * @returns {Promise<void>}
+ */
+export const acquireWithAbort = (dis: TFlowableLockWithAbort) => {
+    return new Promise<void>((resolve, reject) => {
+        if (dis.capacity > 0) {
+            dis.capacity--, resolve();
+        }
+        else {
+            dis.q.push({
+                resolve, reject
+            });
+        }
+    });
+};
+/**
+ * @param {TFlowableLockWithAbort} dis
+ * @returns {void}
+ */
+export const releaseWithAbort = (dis: TFlowableLockWithAbort) => {
+    /** @type {DequeWithAbort} */
+    let dq: Deque<TResolver>;
+    if ((dq = dis.q).length) {
+        const resolver = dq.shift();
+        /* istanbul ignore next */
+        if (!resolver) {
+            // DEVNOTE: Will never reach `THROW`
+            THROW();
+        } else {
+            resolver.resolve();
+        }
     } else {
         dis.capacity++;
     }

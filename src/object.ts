@@ -15,9 +15,7 @@
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 import * as core from "./core";
 import { Deque } from "./deque";
-export type {
-    TVoidFunction, IFlowableLock, ISimplifiedLock,
-} from "./core";
+export type * from "./core";
 
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -25,6 +23,8 @@ export type {
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 const a = core.acquire;
 const r = core.release;
+const aa = core.acquireWithAbort;
+const ra = core.releaseWithAbort;
 
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -79,4 +79,65 @@ export const create = (capacity: number) => {
             }
         }
     }) satisfies core.TFlowableLock;
+};
+/**
+ * object implementation of `TFlowableLockWithAbort`
+ * 
+ *   + constructs a semaphore object limited at `capacity`
+ * 
+ * @param {number} capacity limitation of concurrent async by `capacity`
+ * @date 2025/5/12
+ * @version 1.4
+ */
+export const createWithAbort = (capacity: number) => {
+    return /** @satisfies {core.TFlowableLockWithAbort} */({
+        capacity,
+        limit: capacity,
+        q: new Deque(capacity),
+        /**
+         * @returns {Promise<void>}
+         */
+        acquire(): Promise<void> {
+            return aa(this);
+        },
+        release() {
+            ra(this);
+        },
+        /**
+         * @param {number} restriction
+         */
+        setRestriction(restriction: number) {
+            this.limit = this.capacity = restriction;
+        },
+        get pending() {
+            return this.q.length;
+        },
+        /**
+         * @template {any} T
+         * @param {() => Promise<T>} process 
+         * @returns {Promise<T>}
+         */
+        async flow<T>(process: () => Promise<T>): Promise<T> {
+            await aa(this);
+            try {
+                return await process();
+            } finally {
+                ra(this);
+            }
+        },
+        /**
+         * @throws {AggregateError} description
+         */
+        abort() {
+            const dq = this.q;
+            let resolver: core.TResolver | undefined;
+            const reason: core.IProcessAbortedError = {
+                message: "Process Aborted"
+            };
+            while (resolver = dq.shift()) {
+                resolver.reject(reason);
+            }
+            this.capacity = this.limit;
+        }
+    }) satisfies core.TFlowableLockWithAbort;
 };
