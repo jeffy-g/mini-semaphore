@@ -192,10 +192,8 @@ export const releaseWithAbort = (dis: TFlowableLockWithAbort) => {
             resolver.resolve();
         }
     } else {
-        dis.capacity++;
-    }
-    if (dis.capacity > dis.limit) {
-        console.warn("inconsistent release!");
-        dis.capacity = dis.limit;
+        if (dis.capacity < dis.limit) {
+            dis.capacity++;
+        }
     }
 };
