@@ -163,6 +163,69 @@ async function resolve(id: string | number): Promise<TType> {
 }
 
 ```
+
+---
+> ## Abortable Semaphore
+
+Starting from version **1.4.3**, `mini-semaphore` introduces support for abortable semaphores.  
+This feature allows you to cancel pending tasks and notify listeners when an abort event occurs.  
+This is particularly useful in scenarios where you need to terminate ongoing operations gracefully.
+
+### Key Features
+
+- **Abort Method**: Immediately cancels all pending tasks and restores the semaphore's capacity.
+- **Event Emission**: Emits an `abort` event to notify listeners of the cancellation.
+- **Listener Management**: Provides `onAbort` and `offAbort` methods to register and remove event listeners.
+
+### Example Usage
+
+```typescript
+import { createWithAbort } from "mini-semaphore";
+
+// Create an abortable semaphore with a capacity of 3
+const semaphore = createWithAbort(3);
+
+// Register an abort event listener
+semaphore.onAbort((reason) => {
+    console.log("Abort event received:", reason.message);
+});
+
+// Simulate tasks
+const task = async (id: number) => {
+    try {
+        await semaphore.acquire();
+        console.log(`Task ${id} started`);
+        await new Promise((resolve) => setTimeout(resolve, 1000)); // Simulate work
+        console.log(`Task ${id} completed`);
+        semaphore.release();
+    } catch (e) {
+        console.log(`Task ${id} aborted:`, e.message);
+    }
+};
+
+// Start tasks
+const tasks = [1, 2, 3, 4, 5].map((id) => task(id));
+
+// Abort all pending tasks after 2 seconds
+setTimeout(() => {
+    semaphore.abort();
+}, 2000);
+
+// Wait for all tasks to settle
+Promise.allSettled(tasks).then(() => {
+    console.log("All tasks settled");
+});
+```
+
+### Explanation
+
+1. **Creating an Abortable Semaphore**: Use `createWithAbort` to create a semaphore with abort capabilities.
+2. **Registering Listeners**: Use `onAbort` to listen for abort events and handle cleanup or logging.
+3. **Aborting Tasks**: Call `abort` to cancel all pending tasks. Tasks that are already running will not be interrupted but will complete normally.
+4. **Graceful Cleanup**: Use `offAbort` to remove listeners when they are no longer needed.
+
+This feature enhances the flexibility of `mini-semaphore`, making it suitable for more complex concurrency control scenarios.
+
 > ## Authors
 
  + **jeffy-g** - [jeffy-g](https://github.com/jeffy-g)
