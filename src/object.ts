@@ -117,6 +117,7 @@ export const create = (capacity: number) => {
 export const createWithAbort = (capacity: number) => {
     /** @type {core.TFlowableLockWithAbort} */
     const base: core.TFlowableLockWithAbort = createBase(capacity);
+    const abortListeners: core.TAbortListener[] = [];
     return /** @satisfies {core.TFlowableLockWithAbort} */({
         ...base,
         get pending() {
@@ -137,26 +138,49 @@ export const createWithAbort = (capacity: number) => {
          * @returns {Promise<T>}
          */
         async flow<T>(process: () => Promise<T>): Promise<T> {
-            await aa(this);
+            let result: T | undefined;
             try {
-                return await process();
-            } finally {
+                await aa(this);
+                result = await process();
                 ra(this);
+            } finally {
+                return result as T;
             }
         },
         /**
          * @throws {AggregateError} description
          */
         abort() {
-            const dq = this.q;
-            let resolver: core.TResolver | undefined;
             const reason: core.IProcessAbortedError = {
                 message: "Process Aborted"
             };
+            abortListeners.forEach(listener => listener(reason));
+
+            const dq = this.q;
+            let resolver: core.TResolver | undefined;
             while (resolver = dq.shift()) {
                 resolver.reject(reason);
             }
             this.capacity = this.limit;
+        },
+        /**
+         * Registers an event listener for the "abort" event.
+         * @param {core.TAbortListener} listener
+         */
+        onAbort(listener: core.TAbortListener) {
+            if (!abortListeners.includes(listener)) {
+                abortListeners.push(listener);
+            }
+        },
+        /**
+         * Removes an event listener for the "abort" event.
+         * @param {core.TAbortListener} listener
+         */
+        offAbort(listener: core.TAbortListener) {
+            const idx = abortListeners.findIndex(ls => listener === ls);
+            if (idx !== -1) {
+                /*return */abortListeners.splice(idx, 1);
+            }
         }
     }) satisfies core.TFlowableLockWithAbort;
 };

@@ -80,9 +80,12 @@ export type TResolver = {
     resolve: () => void;
     reject: (reason: any) => void;
 };
+export type TAbortListener = (reason: IProcessAbortedError) => void;
 export type TFlowableLockWithAbort = IFlowableLock & {
     readonly q: Deque<TResolver>;
     abort(): void;
+    onAbort(listener: TAbortListener): void;
+    offAbort(listener: TAbortListener): void;
 };
 export declare interface IProcessAbortedError {
     readonly message: "Process Aborted";
@@ -184,13 +187,11 @@ export const releaseWithAbort = (dis: TFlowableLockWithAbort) => {
     let dq: Deque<TResolver>;
     if ((dq = dis.q).length) {
         const resolver = dq.shift();
-        /* istanbul ignore next */
-        if (!resolver) {
+        resolver && resolver.resolve() || (
             // DEVNOTE: Will never reach `THROW`
-            THROW();
-        } else {
-            resolver.resolve();
-        }
+            /* istanbul ignore next */
+            THROW()
+        );
     } else {
         if (dis.capacity < dis.limit) {
             dis.capacity++;

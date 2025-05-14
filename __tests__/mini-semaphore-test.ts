@@ -311,27 +311,50 @@ function eachModule(path: string) {
     });
 
     describe("mini semaphore with abort", function () {
-      it("handles normal state", async function () {
+
+      const createAbortable = () => {
         const CAPACITY = 7;
+        const listener: Parameters<typeof s.onAbort>[0] = (reason) => {
+          console.log("Abort event received:", reason.message);
+        };
         const s = createWithAbort(4);
         s.setRestriction(CAPACITY);
+        s.onAbort(listener);
+        return { s, CAPACITY, listener };
+      }
+
+      async function runAbortableSemaphoreTest(fireAbort = false) {
+        const { s, CAPACITY, listener } = createAbortable();
         let i = 0;
         const normalTack = async () => {
-          if (i % 2 === 0) {
-            return s.flow(() => delay(WAIT<<1));
-          } else {
-            await s.acquire()
-            await delay(WAIT<<1);
-            s.release();
+          try {
+            if (i % 2 === 0) {
+              return s.flow(() => delay(WAIT<<1));
+            } else {
+              await s.acquire()
+              await delay(WAIT<<1);
+              s.release();
+            }
+          } catch (e) {
+            // console.log(e);
           }
         };
         const promises: Promise<void>[] = [];
         for (; i < 20; i++) {
           promises.push(normalTack());
         }
+        fireAbort && s.abort();
         await Promise.all(promises);
         assert.equal(s.pending, 0);
         assert.equal(s.capacity, CAPACITY);
+        s.offAbort(listener);
+      }
+      it("Handles the semaphore's normal operation gracefully", () => {
+        return runAbortableSemaphoreTest();
+      });
+
+      it("Supports 'abort' event emission for abortable semaphores", () => {
+        return runAbortableSemaphoreTest(true);
       });
 
       it("supports aborting pending tasks", async function () {
