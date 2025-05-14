@@ -84,5 +84,8 @@
     "typescript-eslint": "^8.32.0",
     "webpack": "^5.99.8",
     "webpack-cli": "^6.0.1"
+  },
+  "//pendding": {
+    "emit:dts": "tsc -p ./src/tsconfig-dts.jsonc"
   }
 }
