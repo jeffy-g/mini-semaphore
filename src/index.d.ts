@@ -100,9 +100,15 @@ export declare type TResolver = {
     resolve: () => void;
     reject: (reason: any) => void;
 };
+export declare interface IProcessAbortedError {
+    readonly message: "Process Aborted";
+}
+export type TAbortListener = (reason: IProcessAbortedError) => void;
 export declare type TFlowableLockWithAbort = IFlowableLock & {
     readonly q: Deque<TResolver>;
     abort(): void;
+    onAbort(listener: TAbortListener): void;
+    offAbort(listener: TAbortListener): void;
 };
 
 /**
