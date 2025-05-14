@@ -7,8 +7,19 @@ const webpack = require("webpack");
 const TerserPlugin = require("terser-webpack-plugin");
 const progress = require("./scripts/tiny/progress/");
 
+
 /**
  * @typedef {import("terser").MinifyOptions} MinifyOptions
+ * @typedef {webpack.Compiler} WebpackCompiler
+ * @typedef {(originId: string, module: webpack.Module) => string | number} TModuleIdMaker
+ */
+/** 
+ * @typedef {webpack.Configuration} WebpackConfigration
+ * @typedef {Required<WebpackConfigration>} FixWebpackConfigration
+ * @typedef {RequireThese<WebpackConfigration, "plugins">} WebpackConfigrationWithPlugins
+ * @typedef {{
+ *   forceSourceMap?: true;
+ * }} TExtraOptions
  */
 
 /** @type {RequireThese<MinifyOptions, "format">} */
@@ -17,7 +28,6 @@ const terserOptions = {
     mangle: true,
     format: {
         comments: false,
-        // beautify: true,
         indent_level: 1,
         // ecma: 9,
         max_line_len: 800,
@@ -36,30 +46,53 @@ const tsCompilerOptions = {
     removeComments: true
 };
 
-/** 
- * @typedef {webpack.Configuration} WebpackConfigration
- * @typedef {Required<WebpackConfigration>} FixWebpackConfigration
- * @typedef {{
- *   forceSourceMap?: true;
- * }} TExtraOptions
+/**
+ * @param {TModuleIdMaker} maker 
+ * @returns 
  */
+const mapModuleIds = maker => (/** @type {WebpackCompiler} */compiler) => {
+  const context = /** @type {string} */(compiler.options.context);
+  compiler.hooks.compilation.tap("ChangeModuleIdsPlugin", compilation => {
+    compilation.hooks.beforeModuleIds.tap("ChangeModuleIdsPlugin", modules => {
+      const chunkGraph = compilation.chunkGraph;
+      for (const module of modules) {
+        if (module.libIdent) {
+          const origId = module.libIdent({ context });
+          if (!origId) continue;
+          chunkGraph.setModuleId(module, maker(origId, module));
+        }
+      }
+    });
+  });
+};
+/** @type {TModuleIdMaker} */
+const numberMaker = ((cache) => {
+  let idx = 1;
+  return (oid, mod) => {
+    let nid = cache.get(oid);
+    if (!nid) {
+    // if (nid === void 0) {
+      cache.set(oid, (nid = idx++));
+    }
+    return nid;
+  };
+})(/** @type {Map<string, number>} */(new Map()));
+
+
 /**
  * @param {FixWebpackConfigration["target"]} target 
  * @param {FixWebpackConfigration["output"]} output
  * @param {FixWebpackConfigration["mode"]} [mode] 
  * @param {TExtraOptions} [extraOpt] see {@link TExtraOptions}
- * @return {WebpackConfigration}
+ * @return {WebpackConfigrationWithPlugins}
  * @version 2.0
  * @date 2022/3/20 - update jsdoc, added new parameter `extraOpt`
  */
 const createWebpackConfig = (target, output, mode = "production", extraOpt = {}) =>  {
 
     const {
-        // beautify,
         forceSourceMap,
     } = extraOpt;
-    // DEVNOTE: `beautify` is deperecated, Not implemented anymore
-    // terserOptions.format.beautify = beautify;
 
     /**
      * @type {WebpackConfigration["module"]}
@@ -93,7 +126,8 @@ const createWebpackConfig = (target, output, mode = "production", extraOpt = {})
     const outputModule = /** @type {webpack.LibraryOptions} */(output.library).type === "module";
     const mainName = `${target}@${/** @type {webpack.LibraryOptions} */(output.library).type}`;
 
-    return {
+    /** @type {WebpackConfigrationWithPlugins} */
+    const wpConfig = {
         name: `${mainName}-${mode}`,
         // "production", "development", "none"
         mode,
@@ -129,6 +163,12 @@ const createWebpackConfig = (target, output, mode = "production", extraOpt = {})
         cache: true,
         recordsPath: `${__dirname}/logs/webpack-module-ids_${mainName}.json`
     };
+    
+    if (process.env.REFINE_MODULE_IDS) {
+        wpConfig.plugins.push(mapModuleIds(numberMaker));
+    }
+
+    return wpConfig;
 };
 
 
