@@ -11,7 +11,7 @@ import tinargs from "tin-args";
 
 
 /**
- * @typedef {ReturnType<typeof semaphore.create>} IFlow
+ * @typedef {semaphore.IFlowableLock} IFlow
  * @typedef TStressContext stress test parameters
  * @prop {number} max task count
  * @prop {number} maxDelay wait high value
@@ -107,6 +107,6 @@ export async function stressTest(s, context, cb) {
 if (tinargs().x) {
     // node ./scripts/stress-test.mjs -x
     stressTest(
-        semaphore.create(MAX_CONCURRENT_TASKS), DEFAULT_CONTEXT
+        semaphore.createWithAbort(MAX_CONCURRENT_TASKS), DEFAULT_CONTEXT
     );
 }

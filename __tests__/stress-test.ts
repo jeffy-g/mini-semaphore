@@ -5,12 +5,12 @@
   https://opensource.org/licenses/mit-license.php
  - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 */
-// @ts-ignore avoid ts-jest semantic error
+// @ts-ignore avoid ts-jest semantic error TS7016
 import { stressTest } from "../scripts/stress-test.mjs";
 import { moduleIds } from "./constants";
-// @ts-ignore avoid ts-jest semantic error
+// @ts-ignore avoid ts-jest semantic error TS7016
 import type { TStressContext } from "../scripts/stress-test.mjs";
-import type { create as FNcreate } from "../src/";
+import type { createWithAbort as FNcreate } from "../src/";
 
 
 const stressContext: TStressContext = {
@@ -24,11 +24,11 @@ moduleIds.forEach(eachModule);
 
 function eachModule(path: string) {
 
-  let create: typeof FNcreate;
+  let createWithAbort: typeof FNcreate;
   beforeAll(async () => {
     const mod = await import(path);
     ({
-      create,
+      create: createWithAbort,
       // DEVNOTE: 2023/11/01 - `cjs` module are wrap to `default`
     } = mod.default || mod);
   });
@@ -39,7 +39,7 @@ function eachModule(path: string) {
       execute many tasks that require processing time at random times(in ms) to check reliability. (object)", async () => {
         // tight acquire - Note the value of "s.pending"
         await stressTest(
-          create(10), stressContext,
+          createWithAbort(10), stressContext,
           // @ts-ignore avoid ts-jest semantic error
           (s, total) => {
             expect(s.pending).toBe(0);
