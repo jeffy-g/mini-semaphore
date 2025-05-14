@@ -6,6 +6,8 @@
  - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 */
 const lib = require("../common");
+
+const { CI } = require("../utils");
 const {
     checkENV,
     wppHandlerV5,
@@ -69,6 +71,17 @@ const createProgressSync = (frames, formatOpt) => {
     };
 };
 
+const noop = () => {};
+const emptyProgress = {
+    updateOptions: noop,
+    deadline: noop,
+    newLine: noop,
+    setFPS: noop,
+    renderAsync: noop,
+    run: noop,
+    stop: noop,
+};
+
 /**
  * @typedef {{ fmt: string, payload?: Record<string, string> }} TProgressFormatOptions
  */
@@ -82,6 +95,8 @@ const createProgressSync = (frames, formatOpt) => {
  * @param {() => string} callback
  */
 const createProgressObject = (frames, formatOpt, callback) => {
+
+    if (CI) return emptyProgress;
 
     let done = false;
     const render = () => {
