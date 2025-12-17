@@ -117,3 +117,12 @@ bin
 memo*
 raw-type-volume-map.js
 extra-tests/web/mini-semaphore/webpack
+.gemini
+/.github/*-instructions.md
+/CHANGELOG.md
+/cliff.toml
+/note.txt
+/readme-next.md
+/scripts/dts-test.mjs
+/src/index-pending.d.ts
+/src/tsconfig-dts.jsonc
