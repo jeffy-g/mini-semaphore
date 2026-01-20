@@ -1,6 +1,6 @@
 {
   "name": "mini-semaphore",
-  "version": "1.5.0",
+  "version": "1.5.1",
   "description": "A lightweight version of Semaphore",
   "private": false,
   "main": "./cjs/index.js",
@@ -29,6 +29,20 @@
     "./flow-restrictor": {
       "import": "./esm/flow-restrictor.mjs",
       "require": "./cjs/flow-restrictor.js"
+    },
+    "./umd": {
+      "import": "./umd/index.js",
+      "require": "./umd/index.js",
+      "types": "./umd/index.d.ts"
+    },
+    "./webpack": {
+      "import": "./webpack/index.js",
+      "require": "./webpack/index.js",
+      "types": "./webpack/index.d.ts"
+    },
+    "./webpack-esm": {
+      "import": "./webpack-esm/index.mjs",
+      "types": "./webpack-esm/index.d.mts"
     }
   },
   "author": "jeffy-g",
