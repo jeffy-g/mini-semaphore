@@ -31,7 +31,17 @@ const ra = core.releaseWithAbort;
 //                       class or namespace exports.
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 /**
- * @template {core.IFlowableLock & { q: Deque<unknown>}} T
+ * @import {
+ *   TResolver,
+ *   TFlowableLock,
+ *   IFlowableLock,
+ *   TAbortListener,
+ *   IProcessAbortedError,
+ *   TFlowableLockWithAbort,
+ * } from "./index.mjs";
+ */
+/**
+ * @template {IFlowableLock & { q: Deque<unknown>}} T
  * @param {number} capacity
  * @returns 
  */
@@ -71,9 +81,9 @@ const createBase = <T extends core.IFlowableLock & { q: Deque<unknown>}>(capacit
  * @version 1.0
  */
 export const create = (capacity: number) => {
-    /** @type {core.TFlowableLock} */
+    /** @type {TFlowableLock} */
     const base: core.TFlowableLock = createBase(capacity);
-    return /** @satisfies {core.TFlowableLock} */({
+    return /** @satisfies {TFlowableLock} */({
         ...base,
         get pending() {
             return this.q.length;
@@ -115,10 +125,11 @@ export const create = (capacity: number) => {
  * @version 1.4
  */
 export const createWithAbort = (capacity: number) => {
-    /** @type {core.TFlowableLockWithAbort} */
+    /** @type {TFlowableLockWithAbort} */
     const base: core.TFlowableLockWithAbort = createBase(capacity);
+    /** @type {TAbortListener[]} */
     const abortListeners: core.TAbortListener[] = [];
-    return /** @satisfies {core.TFlowableLockWithAbort} */({
+    return /** @satisfies {TFlowableLockWithAbort} */({
         ...base,
         get pending() {
             return this.q.length;
@@ -138,19 +149,21 @@ export const createWithAbort = (capacity: number) => {
          * @returns {Promise<T>}
          */
         async flow<T>(process: () => Promise<T>): Promise<T> {
+            /** @type {T | undefined} */
             let result: T | undefined;
             try {
                 await aa(this);
                 result = await process();
                 ra(this);
             } finally {
-                return result as T;
+                return /** @type {T} */(result) as T;
             }
         },
         /**
          * @throws {AggregateError} description
          */
         abort() {
+            /** @type {IProcessAbortedError} */
             const reason: core.IProcessAbortedError = {
                 message: "Process Aborted"
             };
@@ -165,7 +178,7 @@ export const createWithAbort = (capacity: number) => {
         },
         /**
          * Registers an event listener for the "abort" event.
-         * @param {core.TAbortListener} listener
+         * @param {TAbortListener} listener
          */
         onAbort(listener: core.TAbortListener) {
             if (!abortListeners.includes(listener)) {
@@ -174,7 +187,7 @@ export const createWithAbort = (capacity: number) => {
         },
         /**
          * Removes an event listener for the "abort" event.
-         * @param {core.TAbortListener} listener
+         * @param {TAbortListener} listener
          */
         offAbort(listener: core.TAbortListener) {
             const idx = abortListeners.findIndex(ls => listener === ls);

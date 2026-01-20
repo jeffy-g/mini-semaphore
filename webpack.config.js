@@ -164,7 +164,7 @@ const createWebpackConfig = (target, output, mode = "production", extraOpt = {})
         recordsPath: `${__dirname}/logs/webpack-module-ids_${mainName}.json`
     };
     
-    if (process.env.REFINE_MODULE_IDS) {
+    if (process.env.WP_REFINE_MODID) {
         wpConfig.plugins.push(mapModuleIds(numberMaker));
     }
 

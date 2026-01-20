@@ -50,6 +50,7 @@ distExtra() {
     "orgpkg -p -k defs"
 
   jstool -cmd rmc -rmc4ts -basePath "dist/cjs,dist/esm"
+  cpx $cpxopt "./build/*.d.ts" dist/cjs
   # js to mjs
   make_mjs
   # Revived `stripWebpack`

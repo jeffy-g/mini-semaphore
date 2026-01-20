@@ -94,13 +94,16 @@ export declare interface IProcessAbortedError {
 export type TVoidFunction = () => void;
 
 /**
- * @typedef {import("./index").TVoidFunction} TVoidFunction
- * @typedef {import("./index").Deque<TVoidFunction>} Deque
- * @typedef {import("./index").TFlowableLockWithAbort} TFlowableLockWithAbort
- * @typedef {import("./index").Deque<TResolver>} DequeWithAbort
- * @typedef {import("./index").ISimplifiedLock} ISimplifiedLock
- * @typedef {import("./index").TFlowableLock} TFlowableLock
- * @typedef {import("./index").IFlowableLock} IFlowableLock
+ * @import {
+ *   TResolver,
+ *   TVoidFunction,
+ *   TFlowableLockWithAbort,
+ *   ISimplifiedLock,
+ *   TFlowableLock,
+ *   IFlowableLock,
+ *   Deque,
+ * } from "./index.mjs";
+ * @typedef {Deque<TResolver>} DequeWithAbort
  */
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -148,7 +151,7 @@ export const acquire = (dis: TFlowableLock, lazy = true) => {
  * @returns {void}
  */
 export const release = (dis: TFlowableLock) => {
-    /** @type {Deque} */
+    /** @type {Deque<TVoidFunction>} */
     let dq: Deque<TVoidFunction>;
     if ((dq = dis.q).length) {
         // DEVNOTE: Will never reach `THROW`

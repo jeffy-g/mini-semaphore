@@ -1,6 +1,6 @@
 {
   "name": "mini-semaphore",
-  "version": "1.4.4",
+  "version": "1.5.0",
   "description": "A lightweight version of Semaphore",
   "private": false,
   "main": "./cjs/index.js",
@@ -8,6 +8,29 @@
   "unpkg": "./umd/index.js",
   "sideEffects": false,
   "types": "./index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./index.d.ts",
+      "import": "./esm/index.mjs",
+      "require": "./cjs/index.js"
+    },
+    "./class": {
+      "import": "./esm/class.mjs",
+      "require": "./cjs/class.js"
+    },
+    "./object": {
+      "import": "./esm/object.mjs",
+      "require": "./cjs/object.js"
+    },
+    "./deque": {
+      "import": "./esm/deque.mjs",
+      "require": "./cjs/deque.js"
+    },
+    "./flow-restrictor": {
+      "import": "./esm/flow-restrictor.mjs",
+      "require": "./cjs/flow-restrictor.js"
+    }
+  },
   "author": "jeffy-g",
   "license": "MIT",
   "bugs": {
@@ -64,11 +87,11 @@
   },
   "devDependencies": {
     "@jeffy-g/cpx": "^1.6.7",
-    "@stylistic/eslint-plugin": "^5.6.1",
+    "@stylistic/eslint-plugin": "^5.7.0",
     "@types/jest": "^30.0.0",
     "@types/webpack": "^5.28.3",
-    "@typescript-eslint/eslint-plugin": "^8.50.0",
-    "@typescript-eslint/parser": "^8.50.0",
+    "@typescript-eslint/eslint-plugin": "^8.53.1",
+    "@typescript-eslint/parser": "^8.53.1",
     "concurrently": "^9.2.1",
     "eslint": "^9.39.2",
     "jest": "^30.2.0",
@@ -81,8 +104,8 @@
     "ts-jest": "^29.4.6",
     "ts-loader": "^9.5.4",
     "typescript": "^5.9.3",
-    "typescript-eslint": "^8.50.0",
-    "webpack": "^5.104.0",
+    "typescript-eslint": "^8.53.1",
+    "webpack": "^5.104.1",
     "webpack-cli": "^6.0.1"
   },
   "//pendding": {

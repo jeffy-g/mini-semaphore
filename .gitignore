@@ -126,3 +126,5 @@ extra-tests/web/mini-semaphore/webpack
 /scripts/dts-test.mjs
 /src/index-pending.d.ts
 /src/tsconfig-dts.jsonc
+
+.codex
