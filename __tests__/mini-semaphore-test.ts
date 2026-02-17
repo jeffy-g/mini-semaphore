@@ -237,7 +237,7 @@ function eachModule(path: string) {
             await pbody("-");
           });
           // DEVNOTE: This function returns only created objects
-          const pinger = await restrictor.getLockByKey("ping");
+          const pinger = (await restrictor.getLockByKey("ping"))!;
           promises[i + 1] = pinger.flow(async () => {
             await delay(1000);
             await pbody("-");
@@ -284,6 +284,7 @@ function eachModule(path: string) {
         let error: Error | null = null;
         try {
           const s = await restrictor.getLockByKey("pping");
+          // @ts-expect-error
           await s.flow(async () => {
             text = await fetch(URL).then(res => res.text());
           });
