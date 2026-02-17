@@ -29,11 +29,9 @@ import type {
 type TFlowableLockWithTimeStamp = IFlowableLock & {
     last?: number;
 };
-
 /**
  * @typedef {import("./index").IFlowableLock & { last?: number }} TFlowableLockWithTimeStamp
  */
-
 
 // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 //                       class or namespace exports.
@@ -87,7 +85,7 @@ export const restrictor = (() => {
      * @param {PropertyKey} key 
      * @returns `IFlowableLock` instance or `undefined`
      */
-    const getLockByKey = async (key: PropertyKey) => {
+    const getLockByKey = async (key: PropertyKey): Promise<TFlowableLockWithTimeStamp | undefined> => {
         // acquire internal lock
         await internalLock.acquire(false);
         const l = locks[key];

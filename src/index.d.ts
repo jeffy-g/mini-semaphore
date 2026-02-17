@@ -213,7 +213,7 @@ declare namespace fr {
      * @param key
      * @returns `IFlowableLock` instance or `undefined`
      */
-    export const getLockByKey: (key: string | number) => Promise<IFlowableLock>;
+    export const getLockByKey: (key: string | number) => Promise<IFlowableLock | undefined>;
     /**
      * Allocate a semaphore for each `key`, and limit the number of shares with the value of `restriction`
      *
