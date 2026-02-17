@@ -1,6 +1,6 @@
 {
   "name": "mini-semaphore",
-  "version": "1.5.2",
+  "version": "1.5.3",
   "description": "A lightweight version of Semaphore",
   "private": false,
   "main": "./cjs/index.js",
