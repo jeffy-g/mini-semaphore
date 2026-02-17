@@ -160,7 +160,8 @@ export const release = (dis: TFlowableLock) => {
         dis.capacity++;
     }
     if (dis.capacity > dis.limit) {
-        console.warn("inconsistent release!");
+        // console.warn("inconsistent release!");
+        console.warn(new Error("[mini-semaphore] inconsistent release!"));
         dis.capacity = dis.limit;
     }
 };
