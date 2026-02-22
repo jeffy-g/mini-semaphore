@@ -11,11 +11,6 @@ export declare class Deque<T extends any> {
      */
     _c: number;
     /**
-     * current length (size
-     * @internal
-     */
-    _l: number;
-    /**
      * current front position
      * @internal
      */

@@ -55,7 +55,6 @@ const gc = (n: number) => {
 export class Deque<T extends any> {
 
     _c: number;
-    _l: number;
     _f: number;
     _a: T[];
 
@@ -71,11 +70,6 @@ export class Deque<T extends any> {
          * @internal
          */
         this._c = gc(ic || 16);
-        /**
-         * current length (size
-         * @internal
-         */
-        this._l = 0;
         /**
          * current front position
          * @internal
@@ -97,7 +91,7 @@ export class Deque<T extends any> {
      * @param {T} s subject
      */
     push(s: T): void {
-        const l = this._l;
+        const l = this.length;
 
         /* https://coderwall.com/p/zbc2zw/the-comment-toggle-trick
         cc(this, l + 1);
@@ -108,25 +102,25 @@ export class Deque<T extends any> {
         //*/
         const i = (this._f + l) & (this._c - 1);
         this._a[i] = s;
-        this.length = this._l = l + 1;
+        this.length = l + 1;
         // return l + 1;
     }
 
     // pop() {
-    //     const l = this._l;
+    //     const l = this.length;
     //     if (l === 0) {
     //         return void 0;
     //     }
     //     const i = (this._f + l - 1) & (this._c - 1);
     //     const ret = this.a[i];
     //     this.a[i] = void 0;
-    //     this.length = this._l = l - 1;
+    //     this.length = l - 1;
 
     //     return ret;
     // }
 
     shift() {
-        const l = this._l;
+        const l = this.length;
         /* istanbul ignore if */
         if (l === 0) {
             return void 0;
@@ -135,7 +129,7 @@ export class Deque<T extends any> {
         const r = this._a[f];
         this._a[f] = /** @type {T} */(void 0) as T;
         this._f = (f + 1) & (this._c - 1);
-        this.length = this._l = l - 1;
+        this.length = l - 1;
 
         return r;
     }
@@ -143,7 +137,7 @@ export class Deque<T extends any> {
     // // this._a.forEach(n => n && console.log(n));
     // /* istanbul ignore next */
     // clear() {
-    //     const l = this._l;
+    //     const l = this.length;
     //     const f = this._f;
     //     const c = this._c;
     //     const a = this._a;
@@ -151,11 +145,11 @@ export class Deque<T extends any> {
     //         a[(f + j) & (c - 1)] = void 0 as unknown as T;
     //     }
     //     this._f = 0;
-    //     this.length = this._l = 0;
+    //     this.length = 0;
     // }
 
     // get length(): number {
-    //     return this._l;
+    //     return this.length;
     // }
 }
 
@@ -187,7 +181,7 @@ const rt = <T>(dis: Deque<T>, n: number) => {
     const oc = dis._c;
     dis._c = n;
     //* ctt
-    const lastIndex = dis._f + dis._l;
+    const lastIndex = dis._f + dis.length;
     /* istanbul ignore next */
     if (lastIndex > oc) {
         // move items count
@@ -196,7 +190,7 @@ const rt = <T>(dis: Deque<T>, n: number) => {
     }
     /*/
     const f = dis._f;
-    const l = dis._l;
+    const l = dis.length;
     // istanbul ignore next
     if (f + l > oc) {
         // move items count

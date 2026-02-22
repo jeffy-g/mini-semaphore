@@ -3,8 +3,8 @@
 // @ts-check
 // webpack config for ts file.
 const webpack = require("webpack");
-// using "terser-webpack-plugin"
-const TerserPlugin = require("terser-webpack-plugin");
+// // using "terser-webpack-plugin"
+// const TerserPlugin = require("terser-webpack-plugin");
 const progress = require("./scripts/tiny/progress/");
 
 
@@ -22,25 +22,25 @@ const progress = require("./scripts/tiny/progress/");
  * }} TExtraOptions
  */
 
-/** @type {RequireThese<MinifyOptions, "format">} */
-const terserOptions = {
-    sourceMap: true,
-    mangle: true,
-    format: {
-        comments: false,
-        indent_level: 1,
-        // ecma: 9,
-        max_line_len: 800,
-        quote_style: 3
-    }
-};
-/** @type {ConstructorParameters<typeof TerserPlugin>[0]} */
-// @ts-ignore TS2322: minify option required
-const terserOpt = {
-    // Enable parallelization. Default number of concurrent runs: os.cpus().length - 1.
-    parallel: true,
-    terserOptions
-};
+// /** @type {RequireThese<MinifyOptions, "format">} */
+// const terserOptions = {
+//     sourceMap: true,
+//     mangle: true,
+//     format: {
+//         comments: false,
+//         indent_level: 1,
+//         // ecma: 9,
+//         max_line_len: 800,
+//         quote_style: 3
+//     }
+// };
+// /** @type {ConstructorParameters<typeof TerserPlugin>[0]} */
+// // @ts-ignore TS2322: minify option required
+// const terserOpt = {
+//     // Enable parallelization. Default number of concurrent runs: os.cpus().length - 1.
+//     parallel: true,
+//     terserOptions
+// };
 /** @type {import("typescript").CompilerOptions} */
 const tsCompilerOptions = {
     removeComments: true
@@ -155,9 +155,9 @@ const createWebpackConfig = (target, output, mode = "production", extraOpt = {})
             ),
         ],
         optimization: {
-            minimizer: [
-                new TerserPlugin(terserOpt)
-            ]
+            // minimizer: [
+            //     new TerserPlugin(terserOpt)
+            // ]
         },
         profile: true,
         cache: true,
