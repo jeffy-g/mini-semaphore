@@ -6,7 +6,7 @@
  - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 */
 import * as semaphore from "../dist/esm/index.mjs";
-import * as tinyProgress from "./tiny-progress.js";
+import * as tinyProgress from "js-dev-tool/extras/tiny-progress";
 import tinargs from "tin-args";
 
 
@@ -88,7 +88,7 @@ export async function stressTest(s, context, cb) {
             // limited number of resources in a round-robin fashion.
             accessCounts[accIndex++ % restriction]++;
         }, false);
-        progress.renderAsync();
+        progress.renderSync();
         await delay(1);
     }
 
