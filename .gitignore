@@ -128,3 +128,5 @@ extra-tests/web/mini-semaphore/webpack
 /src/tsconfig-dts.jsonc
 
 .codex
+
+scripts/tiny*

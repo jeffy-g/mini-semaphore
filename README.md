@@ -226,6 +226,32 @@ Promise.allSettled(tasks).then(() => {
 
 This feature enhances the flexibility of `mini-semaphore`, making it suitable for more complex concurrency control scenarios.
 
+---
+
+> ## Type Information for Subpath Imports
+
+`mini-semaphore` provides full `.d.ts` typings for the root entry:
+
+```ts
+import { create, MiniSemaphore, restrictor } from "mini-semaphore";
+```
+
+Subpath entries (for example `mini-semaphore/class`, `mini-semaphore/object`, `mini-semaphore/deque`, and `mini-semaphore/flow-restrictor`) are  
+primarily intended for advanced usage and are documented with JSDoc type annotations in the distributed ESM files.
+
+```js
+import { create } from "mini-semaphore/object";
+import { MiniSemaphore } from "mini-semaphore/class";
+```
+
+> ### Notes
+
+- Subpath imports are runtime-supported and JSDoc-typed.
+- Dedicated `.d.ts` files for subpath exports may not be provided.
+- If your TypeScript setup does not infer types from JSDoc in `node_modules`, prefer importing from the root package (`"mini-semaphore"`).
+
+---
+
 > ## Authors
 
  + **jeffy-g** - [jeffy-g](https://github.com/jeffy-g)
