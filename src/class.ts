@@ -77,7 +77,7 @@ export class MiniSemaphore implements core.TFlowableLock {
     constructor(capacity: number) {
         /** @type {number} */
         this.limit = this.capacity = capacity;
-        /** @type {Deque<() => void>} */
+        /** @type {import("./index").Deque<() => void>} */
         this.q = new Deque(capacity);
     }
     /**

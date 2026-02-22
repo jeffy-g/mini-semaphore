@@ -1,7 +1,7 @@
 {
   "compilerOptions": {
-    "incremental": true,
-    "tsBuildInfoFile": "./logs/cjs.tsbuildinfo",
+    // "incremental": true,
+    // "tsBuildInfoFile": "./logs/cjs.tsbuildinfo",
 
     "skipDefaultLibCheck": true,
     "skipLibCheck": true,

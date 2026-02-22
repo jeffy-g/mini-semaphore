@@ -38,10 +38,10 @@ const ra = core.releaseWithAbort;
  *   TAbortListener,
  *   IProcessAbortedError,
  *   TFlowableLockWithAbort,
- * } from "./index.mjs";
+ * } from "./index";
  */
 /**
- * @template {IFlowableLock & { q: Deque<unknown>}} T
+ * @template {IFlowableLock & { q: import("./index").Deque<unknown>}} T
  * @param {number} capacity
  * @returns 
  */
@@ -170,6 +170,7 @@ export const createWithAbort = (capacity: number) => {
             abortListeners.forEach(listener => listener(reason));
 
             const dq = this.q;
+            /** @type {TResolver=} */
             let resolver: core.TResolver | undefined;
             while (resolver = dq.shift()) {
                 resolver.reject(reason);

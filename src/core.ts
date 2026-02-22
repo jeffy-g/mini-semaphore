@@ -95,14 +95,12 @@ export type TVoidFunction = () => void;
 
 /**
  * @import {
+ *   Deque,
  *   TResolver,
  *   TVoidFunction,
- *   TFlowableLockWithAbort,
- *   ISimplifiedLock,
  *   TFlowableLock,
- *   IFlowableLock,
- *   Deque,
- * } from "./index.mjs";
+ *   TFlowableLockWithAbort,
+ * } from "./index";
  * @typedef {Deque<TResolver>} DequeWithAbort
  */
 

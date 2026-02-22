@@ -3,7 +3,7 @@
 {
   "extends": "../tsconfig.json",
   "compilerOptions": {
-    "tsBuildInfoFile": "../logs/esm.tsbuildinfo",
+    // "tsBuildInfoFile": "../logs/esm.tsbuildinfo",
     "module": "esnext",
     "outDir": "../build/esm",
     "declaration": true,

@@ -33,16 +33,16 @@
     "./umd": {
       "import": "./umd/index.js",
       "require": "./umd/index.js",
-      "types": "./umd/index.d.ts"
+      "types": "./index.d.ts"
     },
     "./webpack": {
       "import": "./webpack/index.js",
       "require": "./webpack/index.js",
-      "types": "./webpack/index.d.ts"
+      "types": "./index.d.ts"
     },
     "./webpack-esm": {
       "import": "./webpack-esm/index.mjs",
-      "types": "./webpack-esm/index.d.mts"
+      "types": "./index.d.ts"
     }
   },
   "author": "jeffy-g",

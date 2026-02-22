@@ -1,11 +1,11 @@
-/// <reference path="./scripts/tiny/basic-types.d.ts"/>
+/// <reference types="js-dev-tool/basic-types"/>
 
 // @ts-check
 // webpack config for ts file.
 const webpack = require("webpack");
 // // using "terser-webpack-plugin"
 // const TerserPlugin = require("terser-webpack-plugin");
-const progress = require("./scripts/tiny/progress/");
+const progress = require("js-dev-tool/progress");
 
 
 /**
@@ -205,6 +205,7 @@ const createWebpackConfig = (target, output, mode = "production", extraOpt = {})
         "es2019", /* target */
         {       /* output */
             path: "dist/webpack-esm",
+            filename: "[name].mjs",
             library: {
                 type: "module"
             },

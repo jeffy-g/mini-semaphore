@@ -17,10 +17,6 @@ export white="\033[37m"
 SCRIPT_DIR=$(cd $(dirname $0); pwd)
 cpxopt=$([ -z $CI ] && echo "-v" || echo "")
 
-jstool() {
-  # shift 1 # `shift` is needless
-  node "./scripts/tiny/tools.js" $*
-}
 
 force_push() {
   local branch_name=$(git branch --contains=HEAD)
@@ -51,10 +47,11 @@ distExtra() {
 
   jstool -cmd rmc -rmc4ts -basePath "dist/cjs,dist/esm"
   cpx $cpxopt "./build/*.d.ts" dist/cjs
+
   # js to mjs
   make_mjs
-  # Revived `stripWebpack`
-  jstool -cmd stripWebpack
+
+  jstool -cmd replace -after '(($1)=>$2)' -regex 'r/!function\s*\((.+?)\)(.+?\})(?=\(globalThis,)/' ./dist/umd/index.js
 }
 
 copytypes() {
@@ -67,7 +64,7 @@ copytypes() {
   # local dirs="cjs,esm,umd,webpack,webpack-esm"
   # # to array
   # dirs=(${dirs//,/ })
-  local -a dirs=(cjs esm umd webpack webpack-esm)
+  local -a dirs=(cjs esm)
   for dir in "${dirs[@]}"; do
     commands+=("$cpx_pre ./dist/${dir}")
     names+=",dts:dist/${dir}"
@@ -75,7 +72,7 @@ copytypes() {
 
   # echo "${commands[@]@Q}"
   npx concurrently -n "${names}" -c red,green,yellow,blue "${commands[@]@Q}" # need quote
-  fire_shift_ext ts mts d.ts
+  dts2dmts ts mts d.ts
   return $?
 }
 
@@ -86,13 +83,12 @@ webpack() {
 
 make_mjs() {
   jstool -cmd "cjbm" -basePath "./dist/esm" -ext "mjs"
-  fire_shift_ext js mjs js
-  # "./index" to "./index.mjs"
+  # "./index" to "./index.mjs" (and import("./index"))
   sed -i -E 's/"(\.\/index)"/"\1.mjs"/' ./dist/esm/*.mjs
   return $?
 }
 
-fire_shift_ext() {
+dts2dmts() {
   . ${SCRIPT_DIR}/shift-ext.sh
   # shopt -s extglob
   shift_extension $1 $2 "mv" ./dist/{webpack-,}esm/*.$3
